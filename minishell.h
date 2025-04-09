@@ -11,9 +11,12 @@
 typedef struct t_minishell
 {
 	t_instructions *instru;
-	int number_of_commands;
-	int *fd_files;
-	int	*fd_pipes;
+	int		number_of_commands;
+	int		*fd_pipes;
+	char	*from_file_str;
+	int		from_file;
+	char	*to_file_str;
+	int		to_file;
 } 	t_minishell;
 /// @brieflast three are boolean 
 /// absolute path used or not
@@ -21,10 +24,10 @@ typedef struct t_minishell
 typedef struct t_instructions
 {
 	char 	*command;
+	char	**executable;
 	char 	*path_command;
 	int 	absolute;
-	int		appending;
-	int		here_document
+	int		redirection_type;
 }	t_instructions;
 
 
