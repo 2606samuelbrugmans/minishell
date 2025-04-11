@@ -12,7 +12,9 @@ typedef struct t_minishell
 {
 	t_instructions *instru;
 	int		number_of_commands;
-	int		*fd_pipes;
+	int		fd_pipes[2];
+	int 	pipes_used;
+	int		number_of_pipes;
 	char	*parsed_string;
 	char	**envp;
 	char	*before_from;
@@ -29,7 +31,10 @@ typedef struct t_instructions
 	char	**executable;
 	char 	*path_command;
 	int 	absolute;
-	int		redirection_type[2];
+	int		number_files_to;
+	int		*redirection_to;
+	int		number_files_from;
+	int		*redirection_from;
 	char	**from_file_str;
 	int		from_file;
 	char	**to_file_str;
