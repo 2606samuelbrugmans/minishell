@@ -29,8 +29,13 @@ void	process(t_minishell minish)
 		wait(NULL);
 		parser++;
 	}
-	close(minish.fd_pipes[0]);
-	close(minish.fd_pipes[1]);
+	parser = 0;
+	while ( parser < minish.pipes_already_found)
+	{
+		close(minish.fd_pipes[parser][0]);
+		close(minish.fd_pipes[parser][1]);
+		parser++;
+	}
 }
 void	execute(t_minishell minish)
 {
@@ -74,16 +79,32 @@ void access_test(t_minishell minish, int parser)
 	}
 }
 
-void no_redirection_proc(t_minishell minish, int parser)
+void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int can_from_pipe)
 {
-	if (minish.instru[parser].number_files_from == 0 && parser != 0)
-		dup2(minish.fd_pipes[0], STDIN_FILENO);
-	if  (minish.instru[parser].number_files_to == 0 && parser != minish.number_of_commands - 1)
-		dup2(minish.fd_pipes[1], STDOUT_FILENO);
-	if (minish.instru[parser].number_files_from != 0)
-		close(minish.fd_pipes[0]);
-	if (minish.instru[parser].number_files_to != 0)
-		close(minish.fd_pipes[1]);
+	int index;
+	int index_two;
+
+	index_two = 0;
+	index = 0;
+	while (index < minish.pipes_already_found || index_two < minish.pipes_already_found) 
+	{
+		if (minish.pipe_location[index] == parser)
+			can_to_pipe = 1;
+		else if (minish.pipe_location[index] == parser - 1)
+			can_from_pipe = 1;
+		if (can_to_pipe != 1)
+			index++;
+		if (can_from_pipe != 1)
+			index_two++;
+		if (can_to_pipe == 1 || can_from_pipe == 1)
+			break;
+	}
+	
+	if (minish.instru[parser].number_files_from == 0 && can_from_pipe == 1 )
+		dup2(minish.fd_pipes[index_two][0], STDIN_FILENO);
+	if  (minish.instru[parser].number_files_to == 0 && can_to_pipe == 1)
+		dup2(minish.fd_pipes[index][1], STDOUT_FILENO);
+	close_stuff(minish, index, index_two);
 }
 
 void	child_process(t_minishell minish, int parser)
