@@ -12,15 +12,17 @@ typedef struct t_minishell
 {
 	t_instructions *instru;
 	int		number_of_commands;
-	int		fd_pipes[2];
-	int 	pipes_used;
-	int		number_of_pipes;
+	int		(*fd_pipes)[2];
+	/// @pipe_location 0 is the command concerned 1 is write or read interaction
+	/// if value is 0 it's read otherwhise it's write
+	int		*pipe_location;
+	int		pipes_already_found;
 	char	*parsed_string;
 	char	**envp;
 	char	*before_from;
 	char	*before_to;
-	int		instru_unclosed_quote;
-	int		instru_unclosed_doublequote;
+	int		quote;
+	int		doublequote;
 } 	t_minishell;
 /// @brief // redirection type [0] is the input [1] is the output
 ///// first file in the arrays of files are the executed ones

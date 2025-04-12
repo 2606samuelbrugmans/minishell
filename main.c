@@ -1,9 +1,21 @@
 #include "minishell.h"
 
-int	make_pipes(t_minishell minish)
+int	make_pipes(t_minishell minish, int commands)
 {
-	if (pipe(minish.fd_pipes)  == -1)
-		return (perror("couldn't pipe"));
+	if (minish.pipes_already_found == 0)
+	{
+		minish.fd_pipes = malloc(1 * sizeof(int[2]));
+		minish.pipe_location = malloc(1 * sizeof(int));
+	}
+	else 
+	{
+		minish.fd_pipes = realloc(minish.fd_pipes,
+			 (1 + minish.pipes_already_found)* sizeof(int[2]));
+		minish.pipe_location = realloc(minish.pipe_location,
+			 (1 + minish.pipes_already_found) * sizeof(int));
+	}
+	minish.pipe_location[minish.pipes_already_found] = commands;
+	minish.pipes_already_found++;
 }
 void command_after(int strt, t_minishell minish)
 {
@@ -28,7 +40,7 @@ void command_after(int strt, t_minishell minish)
 	}
 	minish.instru[pars].command[index] = '\0';
 }
-
+// // pipe is after or before gotta make an array
 int	after_or_before(char *string, int location, int redirection_index)
 {
 	int before;
@@ -140,38 +152,52 @@ void pre_init_command(t_minishell minish, int pars, int *where)
 		*where++
 	}
 }
-its_a_FILE(char *string, int *index)
+void its_a_FILE(t_minishell minish, int *index, char c)
 {
-	/// skips stuff presumed to be files
-	/// has to deal with quotes as delimiters or space which can be skipped if 
+	/// A SINGLE QUOTE IN THIS CASE IS A PARSING ERROR ACCORDING TO CHATGPT
+	/// I DON4T HAVE BASH AT HOME SORRY
+	while (minish.parsed_string[*index] == c)
+		*index++;
+	while (minish.parsed_string[*index] == ' ')
+		*index++;
+	while (minish.parsed_string[*index] != '|' && minish.parsed_string[*index] != '\0')
+	{
+		if (minish.parsed_string[*index] == 39)
+			lookfor_single_quote(minish, &index);
+		if (minish.parsed_string[*index] == '"')
+			lookfor_double_quote(minish, &index);
+		if (minish.parsed_string[*index] == ' ')
+			break;
+		*index++;
+	}
+	
 }
-int count_commands(char *string)
+int count_commands(t_minishell minish)
 {
 	int index;
 	int commands;
-	int quotes;
 	int found_stuff;
-	int single_quote;
 
-	single_quote = 0;
-	quotes = 0;
 	commands = 0;
 	index = 0;
-	while (string[index] != '\0')
+	while (minish.parsed_string[index] != '\0')
 	{
 		/// unsure about the quotes within single quotes and vice versa
-		if (string[index] == 39)
-			single_quote++;
-		else if (string[index] == '"')
-			quotes += 1;
-		else if ((string[index] == '>' || string[index] == '<')
-				&& (quotes % 2 == 0 && single_quote % 2 == 0))
+		if (minish.parsed_string[index] == 39 && minish.doublequote % 2 == 0)
+			minish.quote++;
+		if (minish.parsed_string[index] == '"' && minish.quote % 2 == 0)
+			minish.doublequote++;
+		else if ((minish.parsed_string[index] == '>' || minish.parsed_string[index] == '<')
+				&& not_quoted(minish))
 		{
 			found_stuff = 0;
-			its_a_FILE(string, &index);
+			its_a_FILE(minish, &index, minish.parsed_string[index]);
 		}
-		else if (string[index] != ' ' && 
-			found_stuff == 0 && quotes % 2 == 0 && single_quote % 2 == 0)
+		// it's gonna be a problem if there's no command after
+		else if (minish.parsed_string[index] == '|' && not_quoted(minish))
+			make_pipes(minish, commands);
+		else if (minish.doublequote != ' ' && 
+			found_stuff == 0 && not_quoted(minish))
 		{
 			found_stuff = 1;
 			commands++;
@@ -195,10 +221,10 @@ int initialise(t_minishell minish, char **envp, char *string)
 	int where;
 
 	where = find_the_end(string);
-	minish.number_of_commands = count_commands(string);
+	minish.parsed_string = string;
+	minish.number_of_commands = count_commands(minish);
 	minish.instru = malloc((minish.number_of_commands + 1) * sizeof(t_instructions));
 	pars = 0;
-	minish.parsed_string = string;
 	minish.envp = envp;
 	while (pars < minish.number_of_commands)
 	{
