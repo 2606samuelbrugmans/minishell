@@ -37,11 +37,12 @@ void	process(t_minishell minish)
 		parser++;
 	}
 }
-void	execute(t_minishell minish)
+void	execute(t_minishell minish, int parser)
 {
 	int	execror;
 
-	execror = execve(path, args, NULL);
+	execror = execve(minish.instru[parser].path_command,
+		minish.instru[parser].executable, NULL);
 	if (execror == -1)
 		error("execution failed", minish);
 }
@@ -53,7 +54,7 @@ void access_test(t_minishell minish, int parser)
 
 	index = 0;
 	/// i need to know if i can have redirections in the middle of the command i think i can
-	while (minish.instru[parser].number_files_from < index)
+	while (minish.instru[parser].number_files_from > index)
 	{
 		if (minish.instru[parser].redirection_from[index] == 1)
 		{
@@ -68,7 +69,7 @@ void access_test(t_minishell minish, int parser)
 		index++;
 	}
 	index = 0;
-	while (minish.instru[parser].number_files_to < index)
+	while (minish.instru[parser].number_files_to > index)
 	{
 		if (access(minish.instru[parser].to_file_str[index], F_OK) == 0)
 		{
@@ -111,8 +112,8 @@ void	child_process(t_minishell minish, int parser)
 {
 	// reduce the size for the norminette
 	// in the parsing should test if the path is absolute
-	no_redirection_proc(minish, parser);
 	access_test(minish, parser);
+	no_redirection_proc(minish, parser);
 	open_stuff(minish, parser);
 	execute(minish);
 }
