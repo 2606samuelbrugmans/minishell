@@ -15,8 +15,7 @@ int redirection(t_minishell minish, int i)
 int within_executable(t_minishell *minish, int i)
 {
     if (minish->parsed_string[i] != '\0' && 
-		(minish->parsed_string[i] != '|' || !(not_quoted(*minish)) &&
-		not_redirection(*minish, i)))
+		(minish->parsed_string[i] != '|' || !(not_quoted(*minish))))
         return (0);
     return (-1);
 }

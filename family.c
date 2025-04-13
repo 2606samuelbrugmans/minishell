@@ -14,7 +14,7 @@ void	process(t_minishell minish)
 	int parser;
 	
 	parser = 0;
-	while (parser < minish.number_of_commands)
+	while (parser <= minish.number_of_commands)
 	{
 		forked = fork();
 		if (forked == -1)
@@ -30,7 +30,7 @@ void	process(t_minishell minish)
 		parser++;
 	}
 	parser = 0;
-	while ( parser < minish.pipes_already_found)
+	while (parser <= minish.pipes_already_found)
 	{
 		close(minish.fd_pipes[parser][0]);
 		close(minish.fd_pipes[parser][1]);
@@ -100,15 +100,18 @@ void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int ca
 		if (can_to_pipe == 1 || can_from_pipe == 1)
 			break;
 	}
-	
 	if (minish.instru[parser].number_files_from == 0 && can_from_pipe == 1 )
 		dup2(minish.fd_pipes[index_two][0], STDIN_FILENO);
+	else if (minish.instru[parser].number_files_from != 0)
+		dup2(minish.instru[parser].from_file, STDIN_FILENO);
 	if  (minish.instru[parser].number_files_to == 0 && can_to_pipe == 1)
 		dup2(minish.fd_pipes[index][1], STDOUT_FILENO);
+	else if (minish.instru[parser].number_files_to != 0)
+		dup2(minish.instru[parser].to_file, STDOUT_FILENO);
 	close_stuff(minish, index, index_two);
 }
 
-void	child_process(t_minishell minish, int parser)
+void	child_process(t_minishell minish, int parser, 0, 0)
 {
 	// reduce the size for the norminette
 	// in the parsing should test if the path is absolute
