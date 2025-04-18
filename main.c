@@ -129,6 +129,8 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 		if ((minish->parsed_string[*where] == '|' && not_quoted(minish))
 			||( minish->parsed_string[*where] != ' ' && has_command == 2))
 			break;
+		else if (minish->parsed_string[*where] == '$' && minish->parsed_string[(*where) + 1] == '(')
+			*where = skip_nested_command(minish);
 		*where++;
 	}
 }
@@ -210,18 +212,18 @@ int count_commands(t_minishell *minish)
 	return (commands);
 	
 }
-int initialise(t_minishell *minish, char **envp, char *string)
+int initialise(t_minishell *minish, char *string, int nested)
 {
 	int pars;
 	int where;
 
+	minish->nested = nested;
 	minish->parsed_string = string;
 	minish->doublequote = 0;
 	minish->quote = 0;
 	minish->number_of_commands = count_commands(minish);
 	minish->instru = malloc((minish->number_of_commands + 1) * sizeof(t_instructions));
 	pars = 0;
-	minish->envp = envp;
 	while (pars < minish->number_of_commands)
 	{
 		pre_init_command(minish, &where, pars);
@@ -239,8 +241,11 @@ int main(char **envp)
 	minish = malloc(1 * sizeof(t_minishell));
 	while (1)
 	{
+		minish->envp = envp;
 		string = readline(prompt);
-		initialise(minish, envp, string);
+		if (parsing_errors(minish) != 0)
+			continue;
+		initialise(minish, string, 0);
 		if (run(minish) != 0)
 			break;
 

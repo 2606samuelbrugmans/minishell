@@ -12,7 +12,9 @@ typedef struct t_minishell
 {
 	t_instructions *instru;
 	int		number_of_commands;
-	int		(*fd_pipes)[2];
+	int		(**fd_pipes)[2];
+	int		nested;
+	int		(**pipe_nested)[2];
 	/// @pipe_location 0 is the command concerned 1 is write or read interaction
 	/// if value is 0 it's read otherwhise it's write
 	int		*pipe_location;
@@ -21,6 +23,7 @@ typedef struct t_minishell
 	char	**envp;
 	char	*before_from;
 	char	*before_to;
+	char	**local_variables;
 	int		quote;
 	int		doublequote;
 } 	t_minishell;

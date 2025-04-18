@@ -79,7 +79,7 @@ void access_test(t_minishell minish, int parser)
 		index++;
 	}
 }
-
+/*
 void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int can_from_pipe)
 {
 	int index;
@@ -110,11 +110,66 @@ void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int ca
 		dup2(minish.instru[parser].to_file, STDOUT_FILENO);
 	close_stuff(minish, index, index_two);
 }
+*/
+void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int can_from_pipe)
+{
+	int index;
+	int index_two;
 
-void	child_process(t_minishell minish, int parser, 0, 0)
+	index_two = 0;
+	index = 0;
+	if (minish.instru[parser].number_files_from == 0 && can_from_pipe == 1 )
+		dup2(minish.fd_pipes[index_two][0], STDIN_FILENO);
+	else if (minish.instru[parser].number_files_from != 0)
+		dup2(minish.instru[parser].from_file, STDIN_FILENO);
+	if  (minish.instru[parser].number_files_to == 0 && can_to_pipe == 1)
+		dup2(minish.fd_pipes[index][1], STDOUT_FILENO);
+	else if (minish.instru[parser].number_files_to != 0)
+		dup2(minish.instru[parser].to_file, STDOUT_FILENO);
+	else if (minish.nested != 0)
+		dup2(minish.pipe_nested[index][1], STDOUT_FILENO);
+	close_stuff(minish, index, index_two);
+}
+void pipe_nested(t_minishell *minish, int length)
+{
+	if (minish->nested == 0)
+		minish->pipe_nested = malloc(1 * sizeof(*minish->pipe_nested));
+	else 
+	minish->pipe_nested = realloc(minish->pipe_nested,
+		 (minish->nested + 1) * sizeof(*minish->pipe_nested));
+	minish->pipe_nested[minish->nested] = malloc(length * sizeof(int[2]));
+		
+}
+void nested(t_minishell *minish, int parser)
+{
+	int *where_nest;
+	int i;
+	ssize_t bytes;
+	int length;
+
+
+	where_nest = check_for_nest(minish, &length);
+	i = 0;
+	pipe_nested(minish, length)
+	while (i < length)
+	{
+		initialise(*minish, minish->instru[parser].executable[where_nest[i]]);
+		i++;
+	}
+	bytes = read(pipe_nest[0], minish->instru[parser].executable[where_nest[i]], 
+		sizeof(minish->instru[parser].executable[where_nest[i]]) - 1);
+	if (bytes > 0)
+		minish->instru[parser].executable[where_nest[i]][bytes] = '\0';
+
+	close(pipefd[0]);
+	wait(NULL); // Wait for child to finish
+
+}
+void	child_process(t_minishell *minish, int parser, 0, 0)
 {
 	// reduce the size for the norminette
 	// in the parsing should test if the path is absolute
+	nested(minish, parser);
 	access_test(minish, parser);
 	no_redirection_proc(minish, parser);
 	open_stuff(minish, parser);
