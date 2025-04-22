@@ -5,7 +5,7 @@ int	run(t_minishell *minish)
 	int i;
 
 	i = 0;
-	while (i <= minish->number_of_commands)
+	while (i < minish->number_of_commands)
 	{
 		if (pipe(minish->fd_pipes[i]) == -1 )
 			perrorr("bablda");
@@ -19,7 +19,7 @@ void	process(t_minishell *minish)
 	int parser;
 	
 	parser = 0;
-	while (parser <= minish->number_of_commands)
+	while (parser < minish->number_of_commands)
 	{
 		forked = fork();
 		if (forked == -1)
@@ -31,7 +31,7 @@ void	process(t_minishell *minish)
 	close_stuff(minish);
 	close_nested_stuff(minish);
 	parser = 0;
-	while (parser <= minish->number_of_commands)
+	while (parser < minish->number_of_commands)
 	{
 		wait(NULL);
 		parser++;
@@ -48,19 +48,19 @@ void	execute(t_minishell minish, int parser)
 }
 /// 
 ///  no touch clean 
-void access_test(t_minishell minish, int parser)
+void access_test(t_minishell *minish, int parser)
 {
 	int index;
 
 	index = 0;
 	/// i need to know if i can have redirections in the middle of the command i think i can
-	while (minish.instru[parser].number_files_from > index)
+	while (minish->instru[parser].number_files_from > index)
 	{
-		if (minish.instru[parser].redirection_from[index] == 1)
+		if (minish->instru[parser].redirection_from[index] == 1)
 		{
-			if (access(minish.instru[parser].from_file_str[index], F_OK) == 0)
+			if (access(minish->instru[parser].from_file_str[index], F_OK) == 0)
 			{
-				if (access(minish.instru[parser].from_file_str[index], R_OK) != 0)
+				if (access(minish->instru[parser].from_file_str[index], R_OK) != 0)
 					error("permission denied:", minish, -1);
 			}
 			else 
@@ -69,11 +69,11 @@ void access_test(t_minishell minish, int parser)
 		index++;
 	}
 	index = 0;
-	while (minish.instru[parser].number_files_to > index)
+	while (minish->instru[parser].number_files_to > index)
 	{
-		if (access(minish.instru[parser].to_file_str[index], F_OK) == 0)
+		if (access(minish->instru[parser].to_file_str[index], F_OK) == 0)
 		{
-			if (access(minish.instru[parser].to_file_str[index], W_OK) != 0)
+			if (access(minish->instru[parser].to_file_str[index], W_OK) != 0)
 				error("permission denied:", minish, -1);
 		}
 		index++;
@@ -119,55 +119,18 @@ void no_redirection_proc(t_minishell *minish, int parser, int can_to_pipe, int c
 
 	index_two = 0;
 	index = 0;
-	if (minish->instru[parser].number_files_from == 0 && can_from_pipe == 1 && parser != 0)
+	if (minish->instru[parser].number_files_from != 0)
 		dup2(minish->fd_pipes[parser - 1][0], STDIN_FILENO);
-	else if (minish->instru[parser].number_files_from != 0)
+	else if (parser != 0)
 		dup2(minish->instru[parser].from_file, STDIN_FILENO);
-	if  (minish->instru[parser].number_files_to == 0 && can_to_pipe == 1 && parser != minish->pipes_already_found)
+	if  (minish->instru[parser].number_files_to != 0)
 		dup2(minish->fd_pipes[parser][1], STDOUT_FILENO);
-	else if (minish->instru[parser].number_files_to != 0)
+	else if (minish->instru[parser].number_files_to == 0 && parser < minish->number_of_commands - 1)
 		dup2(minish->instru[parser].to_file, STDOUT_FILENO);
 	else if (minish->nested[0] != 0)
 		dup2(minish->pipe_nested[minish->nested[0]][minish->nested[1]][1], STDOUT_FILENO);
 	close_stuff(minish);
 	close_nested_stuff(minish);
-}
-int pipe_nested(t_minishell *minish, int length)
-{
-	if (minish->nested == 0)
-		minish->pipe_nested = malloc(1 * sizeof(minish->pipe_nested));
-	else 
-		minish->pipe_nested = realloc(minish->pipe_nested,
-		(minish->nested[0] + 1) * sizeof(minish->pipe_nested));
-}
-void nested(t_minishell *minish, int parser)
-{
-	int *where_nest;
-	int i;
-	ssize_t bytes;
-	int length;
-
-	where_nest = check_for_nest(minish, &length);
-	i = 0;
-	pipe_nested(minish, length);
-	while (i < length)
-	{
-		if (pipe(minish->pipe_nested[minish->nested[0]][i]) == -1 )
-			perrorr("bablda");
-		initialise(*minish, minish->instru[parser].executable[where_nest[i]],
-			(int[]){minish->nested[0] + 1, i});
-		i++;
-	}
-	while (i < length)
-	{
-		bytes = read(minish->pipe_nested[minish->nested[0]][i][0],
-		minish->instru[parser].executable[where_nest[i]], 
-		sizeof(minish->instru[parser].executable[where_nest[i]]) - 1);
-		if (bytes > 0)
-			minish->instru[parser].executable[where_nest[i]][bytes] = '\0';
-		i++;
-	}
-	minish->nested_width = length;
 }
 void	child_process(t_minishell *minish, int parser)
 {

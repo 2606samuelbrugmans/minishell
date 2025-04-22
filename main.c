@@ -104,7 +104,7 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 			minish->doublequote++;
 		else if (minish->doublequote % 2 == 0 && minish->parsed_string[*where] == 39)
 			minish->quote++;
-		if (redirection(minish))
+		if (redirection(minish, *where))
 			*where = get_file_and_redirection(minish, &where, pars);
 		else if (minish->parsed_string[*where] != ' ')
 			*where = get_command(minish, *where, &has_command, pars);
@@ -112,7 +112,7 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 			||( minish->parsed_string[*where] != ' '))
 			break;
 		else if (minish->parsed_string[*where] == '$' && minish->parsed_string[(*where) + 1] == '(')
-			*where = skip_nested_command(minish, *where, &has_command);
+			*where = skip_nested_command(minish, *where, &has_command, -1);
 		*where++;
 	}
 }
@@ -147,7 +147,7 @@ int skip_nested_command(t_minishell *minish, int *type, int index, int parser)
 	while (minish->parsed_string[index + index_two] != '\0')
 	{
 
-		skip_quotes(minish);
+		skip_quotes(minish->parsed_string, index, index_two);
 		if (minish->parsed_string[index + index_two] == '(')
 			parentheses++;
 		if (minish->parsed_string[index + index_two] == ')')
@@ -157,7 +157,7 @@ int skip_nested_command(t_minishell *minish, int *type, int index, int parser)
 			break;
 	}
 	if (type && (*type == 0 || type == 1))
-		make_executable(minish, index, index_two);
+		make_executable(minish, index, index_two, parser);
 	return (index + index_two);
 }
 
