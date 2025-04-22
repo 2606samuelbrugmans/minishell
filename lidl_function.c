@@ -19,3 +19,27 @@ int within_executable(t_minishell *minish, int i)
         return (0);
     return (-1);
 }
+int	skip_spaces(char *str, int where)
+{
+	while (str[where] == ' ')
+		where++;
+	return (where);
+}
+
+int	is_stopper(char c)
+{
+	return (c == ' ' || c == '|' || c == '<' || c == '>' || c == '\0');
+}
+
+int	find_end_index(char *str, int where, char quote)
+{
+	while (str[where])
+	{
+		if (quote && str[where] == quote)
+			break;
+		if (!quote && is_stopper(str[where]))
+			break;
+		where++;
+	}
+	return (where);
+}

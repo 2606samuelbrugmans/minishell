@@ -1,5 +1,5 @@
 #include "minishell.h"
-
+/*
 int	make_pipes(t_minishell *minish, int commands)
 {
 	if (minish->pipes_already_found == 0)
@@ -27,48 +27,27 @@ int	make_pipes(t_minishell *minish, int commands)
 */
 int	get_Command(t_minishell *minish, int location, int *has_command, int pars)
 {
-	// return value can be an error
+	// if hascommand = 0 make the executable and the command if not
 	int	index;
 	char *arg;
 
 	index = 0;
-	*has_command = 2;
-	while (within_executable(minish, location + index))
-	{
-		if (!not_quoted(minish))
-			location =(get_quoted_command(minish, location, index, pars));
-		index++;
-	}
-	minish->instru[pars].command = get_string(minish, location, index);
-	make_executable(minish);
-	location += index;
-	index = 0;
-	while (within_executable(minish, location + index))
-	{
-		while (minish->parsed_string[location] == ' ')
-			location++;
-		while (minish->parsed_string[location] != ' ')
-		{
-			if (redirection(minish, (location + index)))
-				get_file_and_redirection(minish, &(location + index), pars);
-			if (minish->parsed_string[location] == '"' || minish->parsed_string[location] == 39)
-				index = (get_quoted_command(minish, location, index, pars));
-			index++;
-		}
-		arg = get_string(minish, location, index);
-		complete_executable(minish, arg);
-		location += index;
-		index = 0;
-	}
+	if (!not_quoted(minish))
+		index = get_quoted_command(minish, location, index, pars);
+	else
+		index = get_unquoted_command(minish, location, index, pars);
+	if (*has_command == 0)
+		minish->instru[pars].command = get_string(minish, location, index);
+	make_executable(minish, *has_command, location, index);
+	*has_command = 1;
 	return (location + index);
 }
-
 
 int ft_str_join_special()
 {
 
 }
-void set_up_redirection(t_minishell *minish, char *direction, int type, int pars)
+int set_up_redirection(t_minishell *minish, char *direction, int type, int pars)
 {
 	if (direction == "from")
 	{
@@ -96,7 +75,8 @@ void set_up_redirection(t_minishell *minish, char *direction, int type, int pars
 	}
 }
 int get_file_and_redirection(t_minishell *minish, int where, int pars)
-{	
+{
+
 	if (minish->parsed_string[where] == minish->parsed_string[where +1])
 	{
 		if (minish->parsed_string[where] == '<')
@@ -108,7 +88,9 @@ int get_file_and_redirection(t_minishell *minish, int where, int pars)
 		set_up_redirection(minish, "from", 1, pars);
 	else if (minish->parsed_string[where] == '>')
 		set_up_redirection(minish, "to", 1, pars);
-	return (minish, where, minish->parsed_string[where]);
+	where = get_string(minish, where, pars, minish->parsed_string[where]);
+	
+	return (where);
 }
 void pre_init_command(t_minishell *minish, int pars, int *where)
 {
@@ -120,17 +102,17 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 	{
 		if (minish->quote % 2 == 0 && minish->parsed_string[*where] == '"')
 			minish->doublequote++;
-		else if (minish->doublequote % 2 ==  0 && minish->parsed_string[*where] == 39)
+		else if (minish->doublequote % 2 == 0 && minish->parsed_string[*where] == 39)
 			minish->quote++;
 		if (redirection(minish))
 			*where = get_file_and_redirection(minish, &where, pars);
-		else if (minish->parsed_string[*where] != ' ' && has_command == 0)
+		else if (minish->parsed_string[*where] != ' ')
 			*where = get_command(minish, *where, &has_command, pars);
 		if ((minish->parsed_string[*where] == '|' && not_quoted(minish))
-			||( minish->parsed_string[*where] != ' ' && has_command == 2))
+			||( minish->parsed_string[*where] != ' '))
 			break;
 		else if (minish->parsed_string[*where] == '$' && minish->parsed_string[(*where) + 1] == '(')
-			*where = skip_nested_command(minish);
+			*where = skip_nested_command(minish, *where, &has_command);
 		*where++;
 	}
 }
@@ -139,7 +121,7 @@ int its_a_FILE(t_minishell minish, int index, char c)
 {
 	/// A SINGLE QUOTE IN THIS CASE IS A PARSING ERROR ACCORDING TO CHATGPT
 	/// I DON4T HAVE BASH AT HOME SORRY
-	while (minish.parsed_string[index] == c)
+	while (minish.parsed_string[index] == 'c')
 		index++;
 	while (minish.parsed_string[index] == ' ')
 		index++;
@@ -155,27 +137,55 @@ int its_a_FILE(t_minishell minish, int index, char c)
 	}
 	return (index);
 }
-/*
-int count_commands(t_minishell minish)
+int skip_nested_command(t_minishell *minish, int *type, int index, int parser)
+{
+	int parentheses;
+	int index_two;
+
+	index_two = 0;
+	parentheses = 1;
+	while (minish->parsed_string[index + index_two] != '\0')
+	{
+
+		skip_quotes(minish);
+		if (minish->parsed_string[index + index_two] == '(')
+			parentheses++;
+		if (minish->parsed_string[index + index_two] == ')')
+			parentheses--;
+		index_two++;
+		if (parentheses == 0)
+			break;
+	}
+	if (type && (*type == 0 || type == 1))
+		make_executable(minish, index, index_two);
+	return (index + index_two);
+}
+
+int count_commands(t_minishell *minish)
 {
 	int index;
 	int commands;
 
 	commands = 0;
 	index = 0;
-	while (minish.parsed_string[index] != '\0')
+	while (minish->parsed_string[index] != '\0')
 	{
-		if (not_quoted(minish) && minish.parsed_string[index] == '|')
+		if (minish->parsed_string[index] == '$' && minish->parsed_string[(index) + 1] == '('
+		&& minish->quote % 2 == 0)
+			index = skip_nested_command(minish, NULL, index, -1);
+		if (not_quoted(minish) && minish->parsed_string[index] == '|')
 			commands++;
-		if (minish.doublequote % 2 == 0 && minish.parsed_string[index] == '\'')
-			minish.quote++;
-		if (minish.quote % 2 == 0 && minish.parsed_string[index] == '\"')
-			minish.doublequote++;
+		if (minish->doublequote % 2 == 0 && minish->parsed_string[index] == '\'')
+			minish->quote++;
+		if (minish->quote % 2 == 0 && minish->parsed_string[index] == '\"')
+			minish->doublequote++;
 		index++;
 	}
-	return (commands);
+	minish->fd_pipes = malloc(commands * sizeof(int[2]));
+	return (commands + 1);
 }
-*/
+
+/*
 int count_commands(t_minishell *minish)
 {
 	int index;
@@ -212,12 +222,14 @@ int count_commands(t_minishell *minish)
 	return (commands);
 	
 }
-int initialise(t_minishell *minish, char *string, int nested)
+*/
+int initialise(t_minishell *minish, char *string, int *nested)
 {
 	int pars;
 	int where;
 
-	minish->nested = nested;
+	minish->nested[0] = nested[0];
+	minish->nested[1] = nested[1];
 	minish->parsed_string = string;
 	minish->doublequote = 0;
 	minish->quote = 0;
@@ -229,7 +241,7 @@ int initialise(t_minishell *minish, char *string, int nested)
 		pre_init_command(minish, &where, pars);
 		pars++;
 	}
-	return (0);
+	return (run(minish));
 }
 
 int main(char **envp)
@@ -238,6 +250,8 @@ int main(char **envp)
 	char 			*string;
 	t_minishell		*minish;
 
+	minish->nested[0] = 0;
+	minish->nested[1] = 0;
 	minish = malloc(1 * sizeof(t_minishell));
 	while (1)
 	{
@@ -245,10 +259,8 @@ int main(char **envp)
 		string = readline(prompt);
 		if (parsing_errors(minish) != 0)
 			continue;
-		initialise(minish, string, 0);
-		if (run(minish) != 0)
-			break;
-
+		initialise(minish, string, minish->nested);
 	}
 	free_everything(minish);
+	return (0);
 }
