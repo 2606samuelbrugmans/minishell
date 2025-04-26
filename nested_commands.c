@@ -9,30 +9,63 @@ int pipe_nested(t_minishell *minish, int length)
 		(minish->nested[0] + 1) * sizeof(minish->pipe_nested));
 	return (0);
 }
-int **check_for_nest(t_minishell *minish, int *args_containing, int parser, int *num_nests)
+int **check_for_nest(t_minishell *minish, int parser)
 {
 	int **nests;
+	int	x;
+	int index;
+	int y;
+	int c;
 
-
+	minish->doublequote = 0;
+	minish->quote = 0;
+	index = 0;
+	x = 0;
+	y = 0;
+	while (minish->instru[parser].executable[x] != '\0')
+	{
+		while (minish->instru[parser].executable[x][y] != '\0')
+		{
+			if (minish->instru[parser].executable[x][y] == '$' 
+			&& minish->instru[parser].executable[x][y] == '(' && not_quoted(minish))
+			{
+				c = skip_nested_command(minish->instru[parser].executable[x], y +2);
+				index += adjust_nests(x, y + 2, c, nests);
+				c = y;
+			}
+			else 
+				y++;
+			seek_quote(minish);
+			x++;
+		}
+		x++;
+	}
+	return (nests);
 }
 void nested(t_minishell *minish, int parser)
 {
-	//// where_nest first element is the number of substittion commands
-	//// second element is which arg its tied to
-	//// third element is the first index if only one it4s 0 
+	//// where_nest [0][0] is the number of substuttion commands
+	//// where_nest [0][1] is the number of strings in executable wich have a substitution commands so how big (x - 1) can get also
+	//// 
+	//// where_nest [x][0] except for x = 0 is which stirng in  char	**executable the following nest is tied to
+	//// where_nest [x][1] the number of nested commands within the executable thus the size of the array at x / 2
+	//
+	/// where_nest at [x][2] is the starting index of the nested command in the executable
+	/// where_nest at [x][3] is the ending index of the nested command in the executable
+	/// where_nest at [x][y] from now on is only starting and ending index
 	/// fourth element is the  end of such a substitution command
 	/// rinse and repeat until none are left
-	int **where_nest;
+	int 	**where_nest;
+	char	***string;
 	int i;
 	ssize_t bytes;
-	int length;
-	int	*num_nests;
-	char *new_arg;
-
-	where_nest = check_for_nest(minish, &length, parser, &num_nests);
+	char *buffer;
+	
+	where_nest = check_for_nest(minish, parser);
+	string = get_nested_strings(minish, parser);
+	pipe_nested(minish, where_nest[0][0]);
 	i = 0;
-	pipe_nested(minish, length);
-	while (i < length)
+	while (i < where_nest[0][0])
 	{
 		if (pipe(minish->pipe_nested[minish->nested[0]][i]) == -1 )
 			perrorr("bablda");
@@ -41,8 +74,7 @@ void nested(t_minishell *minish, int parser)
 			(int[2]){minish->nested[0] + 1, i});
 		i++;
 	}
-
-	while (i < length)
+	while (i < where_nest[0][0])
 	{
 		bytes = read(minish->pipe_nested[minish->nested[0]][i][0],
 		minish->instru[parser].executable[where_nest[i]], 
@@ -51,5 +83,5 @@ void nested(t_minishell *minish, int parser)
 			minish->instru[parser].executable[where_nest[i]][bytes] = '\0';
 		i++;
 	}
-	minish->nested_width = length;
+	minish->nested_width = where_nest[0][0];
 }

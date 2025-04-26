@@ -35,6 +35,7 @@ int	find_end_index(char *str, int where, char quote)
 {
 	while (str[where])
 	{
+		where = skip_nested_command(minis)
 		if (quote && str[where] == quote)
 			break;
 		if (!quote && is_stopper(str[where]))

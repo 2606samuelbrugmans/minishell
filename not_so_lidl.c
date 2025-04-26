@@ -29,7 +29,7 @@ int	get_string(t_minishell *minish, int where, int pars, char direction)
 	int		start;
 	int		end;
 	char	quote;
-	char	*filename;
+	char	*str;
 
 	where = skip_spaces(minish->parsed_string, where);
 	quote = 0;
@@ -37,23 +37,48 @@ int	get_string(t_minishell *minish, int where, int pars, char direction)
 		quote = minish->parsed_string[where++];
 	start = where;
 	end = find_end_index(minish->parsed_string, where, quote);
-	filename = ft_substr(minish->parsed_string, start, end - start);
-	store_filename(minish, pars, filename, direction);
+	str = ft_substr(minish->parsed_string, start, end - start);
+	store(minish, pars, str, direction);
 	if (quote && minish->parsed_string[end] == quote)
 		end++;
 	return (end);
 }
+int number_strings(char **array)
+{
+    int count;
 
-void	store_filename(t_minishell *minish, int pars,
+	count = 0;
+    while (array[count] != NULL)
+        count++;
+    return count;
+}
+
+void	store(t_minishell *minish, int pars,
 	char *filename, char direction)
 {
 	t_instructions	*instr;
+	int n;
 
+	n = 0;
 	instr = &minish->instru[pars];
 	if (!filename)
 		return ;
 	if (direction == '>')
 		instr->to_file_str[instr->number_files_to - 1] = filename;
-	else if (!ft_strncmp(direction, "from", 5))
+	else if (direction == '<')
 		instr->from_file_str[instr->number_files_from - 1] = filename;
+	else if (direction == 'c')
+		instr->command = filename;
+	if (direction == 'e' || direction == 'c')
+	{
+		if (direction == 'c')
+			instr->executable = malloc(2 * sizeof(char *));
+		else
+		{
+			n = number_strings(instr->executable);
+			realloc(instr->executable, (n + 2) * sizeof(char *));
+			instr->executable[n] = filename;
+			instr->executable[n + 1] = '\0';
+		}
+	}
 }

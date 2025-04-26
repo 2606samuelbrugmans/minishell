@@ -47,7 +47,6 @@ typedef struct t_instructions
 	int		from_file;
 	char	**to_file_str;
 	int		to_file;
-
 }	t_instructions;
 
 void	child_process(t_minishell *minish, int parser);
@@ -59,7 +58,7 @@ int		get_string(t_minishell *minish, int where, int pars, char direction);
 void	skip_quotes(const char *str, int base_index, int *offset_index);
 int 	initialise(t_minishell *minish, char *string, int *nested);
 int 	count_commands(t_minishell *minish);
-int 	skip_nested_command(t_minishell *minish, int *type, int index, int parser);
+int 	skip_nested_command(char *parsed_string, int index);
 int 	its_a_FILE(t_minishell minish, int index, char c);
 void 	pre_init_command(t_minishell *minish, int pars, int *where);
 int 	get_file_and_redirection(t_minishell *minish, int where, int pars);

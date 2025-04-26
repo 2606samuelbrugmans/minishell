@@ -32,15 +32,13 @@ int	get_Command(t_minishell *minish, int location, int *has_command, int pars)
 	char *arg;
 
 	index = 0;
-	if (!not_quoted(minish))
-		index = get_quoted_command(minish, location, index, pars);
-	else
-		index = get_unquoted_command(minish, location, index, pars);
+	if 
 	if (*has_command == 0)
-		minish->instru[pars].command = get_string(minish, location, index);
-	make_executable(minish, *has_command, location, index);
+		index = get_string(minish, location, pars,'c');
+	else 
+		index = get_string(minish, location, pars, 'e');
 	*has_command = 1;
-	return (location + index);
+	return (index);
 }
 
 int ft_str_join_special()
