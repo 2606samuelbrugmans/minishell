@@ -30,7 +30,7 @@ int **check_for_nest(t_minishell *minish, int parser)
 			&& minish->instru[parser].executable[x][y] == '(' && not_quoted(minish))
 			{
 				c = skip_nested_command(minish->instru[parser].executable[x], y +2);
-				index += adjust_nests(x, y + 2, c, nests);
+				index += adjust_nests(x, y + 2, c-1, nests);
 				c = y;
 			}
 			else 
@@ -41,6 +41,32 @@ int **check_for_nest(t_minishell *minish, int parser)
 		x++;
 	}
 	return (nests);
+}
+char ***get_nested_strings(t_minishell *minish,int parser, char ***string, int **where_nest)
+{
+	int i;
+	int j;
+	int y;
+
+	i = 1;
+	string = malloc((where_nest[0][1]) *sizeof(char **));
+	while (i < where_nest[0][1])
+	{
+		y = 3;
+		j = 0;
+		string[i] = malloc((where_nest[i][1] / 2) *sizeof(char *));
+		while (j < where_nest[i][1] / 2)
+		{
+			string[i][j] = malloc((where_nest[i][y] - where_nest[i][y - 1] + 1) * sizeof(char));
+			string[i][j] = ft_substr(minish->instru[parser].executable[where_nest[i][0]]
+				,where_nest[i][y - 1], where_nest[i][y] - where_nest[i][y - 1]);
+			y+=2;
+			j++;
+		}
+		
+	}
+	
+	return (string);
 }
 void nested(t_minishell *minish, int parser)
 {
@@ -62,7 +88,7 @@ void nested(t_minishell *minish, int parser)
 	char *buffer;
 	
 	where_nest = check_for_nest(minish, parser);
-	string = get_nested_strings(minish, parser);
+	string = get_nested_strings(minish, parser, string);
 	pipe_nested(minish, where_nest[0][0]);
 	i = 0;
 	while (i < where_nest[0][0])

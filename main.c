@@ -32,7 +32,6 @@ int	get_Command(t_minishell *minish, int location, int *has_command, int pars)
 	char *arg;
 
 	index = 0;
-	if 
 	if (*has_command == 0)
 		index = get_string(minish, location, pars,'c');
 	else 
@@ -45,9 +44,9 @@ int ft_str_join_special()
 {
 
 }
-int set_up_redirection(t_minishell *minish, char *direction, int type, int pars)
+int set_up_redirection(t_minishell *minish, char direction, int type, int pars)
 {
-	if (direction == "from")
+	if (direction == '<')
 	{
 		minish->instru[pars].number_files_from++;
 		if (minish->instru[pars].number_files_from == 1)
@@ -78,14 +77,14 @@ int get_file_and_redirection(t_minishell *minish, int where, int pars)
 	if (minish->parsed_string[where] == minish->parsed_string[where +1])
 	{
 		if (minish->parsed_string[where] == '<')
-			set_up_redirection(minish, "from", 2, pars);
+			set_up_redirection(minish, '<', 2, pars);
 		else if (minish->parsed_string[where] == '>')
-			set_up_redirection(minish, "to", 2, pars);
+			set_up_redirection(minish, '>', 2, pars);
 	}
 	else if (minish->parsed_string[where] == '<')
-		set_up_redirection(minish, "from", 1, pars);
+		set_up_redirection(minish, '<', 1, pars);
 	else if (minish->parsed_string[where] == '>')
-		set_up_redirection(minish, "to", 1, pars);
+		set_up_redirection(minish, '>', 1, pars);
 	where = get_string(minish, where, pars, minish->parsed_string[where]);
 	
 	return (where);
@@ -109,8 +108,6 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 		if ((minish->parsed_string[*where] == '|' && not_quoted(minish))
 			||( minish->parsed_string[*where] != ' '))
 			break;
-		else if (minish->parsed_string[*where] == '$' && minish->parsed_string[(*where) + 1] == '(')
-			*where = skip_nested_command(minish, *where, &has_command, -1);
 		*where++;
 	}
 }
@@ -135,27 +132,29 @@ int its_a_FILE(t_minishell minish, int index, char c)
 	}
 	return (index);
 }
-int skip_nested_command(t_minishell *minish, int *type, int index, int parser)
+
+int skip_nested_command(char *parsed_string, int index)
 {
 	int parentheses;
 	int index_two;
 
 	index_two = 0;
 	parentheses = 1;
-	while (minish->parsed_string[index + index_two] != '\0')
+	while (parsed_string[index + index_two] != '\0')
 	{
-
-		skip_quotes(minish->parsed_string, index, index_two);
-		if (minish->parsed_string[index + index_two] == '(')
+		skip_quotes(parsed_string, index, &index_two);
+		if (parsed_string[index + index_two] == '(')
 			parentheses++;
-		if (minish->parsed_string[index + index_two] == ')')
+		if (parsed_string[index + index_two] == ')')
 			parentheses--;
-		index_two++;
+			index_two++;
 		if (parentheses == 0)
 			break;
 	}
+	/*
 	if (type && (*type == 0 || type == 1))
 		make_executable(minish, index, index_two, parser);
+	*/
 	return (index + index_two);
 }
 
@@ -170,7 +169,7 @@ int count_commands(t_minishell *minish)
 	{
 		if (minish->parsed_string[index] == '$' && minish->parsed_string[(index) + 1] == '('
 		&& minish->quote % 2 == 0)
-			index = skip_nested_command(minish, NULL, index, -1);
+			index = skip_nested_command(minish, index + 2);
 		if (not_quoted(minish) && minish->parsed_string[index] == '|')
 			commands++;
 		if (minish->doublequote % 2 == 0 && minish->parsed_string[index] == '\'')
