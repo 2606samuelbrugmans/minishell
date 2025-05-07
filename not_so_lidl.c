@@ -6,11 +6,9 @@ void skip_quotes(const char *str, int base_index, int *offset_index)
 
     if (!str || !offset_index)
         return ;
-
     i = base_index + *offset_index;
     if (str[i] != '"' && str[i] != '\'')
         return ;
-
     i++; // Skip opening quote
     while (str[i] != '\0' && str[i] != str[base_index + *offset_index])
     {
@@ -18,12 +16,28 @@ void skip_quotes(const char *str, int base_index, int *offset_index)
             i++; // Skip escaped character
         i++;
     }
-
     if (str[i] == str[base_index + *offset_index])
         i++; // Skip closing quote
-
     *offset_index = i - base_index;
 }
+int	find_start(const char *str, int i)
+{
+	char c;
+
+	c = str[i];
+
+	while (str[i] == 'c')
+		i++;
+	while (str[i] != '\0')
+	{
+		if (str[i] != ' ' && str[i] != '\t' && str[i] != '\n')
+			return (i);
+		i++;
+	}
+	return (-1);
+}
+
+
 int	get_string(t_minishell *minish, int where, int pars, char direction)
 {
 	int		start;
@@ -31,10 +45,11 @@ int	get_string(t_minishell *minish, int where, int pars, char direction)
 	char	quote;
 	char	*str;
 
-	where = skip_spaces(minish->parsed_string, where);
+	if (direction == '>' || direction == '<')
+		start = find_start(minish->parsed_string, where);
 	quote = 0;
 	if (minish->parsed_string[where] == '\'' || minish->parsed_string[where] == '"')
-		quote = minish->parsed_string[where++];
+		quote = minish->parsed_string[where];
 	start = where;
 	end = find_end_index(minish->parsed_string, where, quote);
 	str = ft_substr(minish->parsed_string, start, end - start);
