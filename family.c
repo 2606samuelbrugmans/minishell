@@ -51,6 +51,7 @@ void	execute(t_minishell minish, int parser)
 void access_test(t_minishell *minish, int parser)
 {
 	int index;
+	int fd;
 
 	index = 0;
 	/// i need to know if i can have redirections in the middle of the command i think i can
@@ -62,8 +63,14 @@ void access_test(t_minishell *minish, int parser)
 			{
 				if (access(minish->instru[parser].from_file_str[index], R_OK) != 0)
 					error("permission denied:", minish, -1);
+				else
+					fd = open(minish->instru[parser].from_file_str[index], O_RDONLY);
+				if (index != minish->instru[parser].number_files_from - 1)
+					close(fd);
+				else 
+					minish->instru[parser].from_file = fd;
 			}
-			else 
+			else
 				error("no such file or directory:", minish, -1);
 		}
 		index++;
@@ -75,6 +82,14 @@ void access_test(t_minishell *minish, int parser)
 		{
 			if (access(minish->instru[parser].to_file_str[index], W_OK) != 0)
 				error("permission denied:", minish, -1);
+			if (minish->instru[parser].redirection_to[index] == 1)
+				fd = open(minish->instru[parser].to_file_str[index], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+			else 
+				fd = open(minish->instru[parser].to_file_str[index], O_WRONLY | O_CREAT | O_APPEND, 0644);
+			if (index != minish->instru[parser].number_files_to - 1)
+				close(fd);
+			else 
+				minish->instru[parser].to_file = fd;
 		}
 		index++;
 	}
