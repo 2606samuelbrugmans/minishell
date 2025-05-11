@@ -1,4 +1,5 @@
 #include "minishell.h"
+
 void close_stuff(t_minishell *minish)
 {
 	int i;
@@ -11,6 +12,7 @@ void close_stuff(t_minishell *minish)
         i++;
 	}
 }
+/*
 void    close_nested_stuff(t_minishell *minish)
 {
     int i;
@@ -23,3 +25,4 @@ void    close_nested_stuff(t_minishell *minish)
         i++;
 	}
 }
+*/

@@ -7,32 +7,10 @@
 # include <stdio.h>
 # include <fcntl.h>
 # include <stddef.h>
+# include <sys/wait.h>
 # include <readline/readline.h>
 # include <readline/history.h>
 ///
-typedef struct t_minishell
-{
-	t_instructions *instru;
-	int		number_of_commands;
-	int		(*fd_pipes)[2];
-	int		nested_width;
-	int		nested[2];
-	int		(**pipe_nested)[2];
-	/// @pipe_location 0 is the command concerned 1 is write or read interaction
-	/// if value is 0 it's read otherwhise it's write
-	int		*pipe_location;
-	int		pipes_already_found;
-	char	*parsed_string;
-	char	**envp;
-	char	*before_from;
-	char	*before_to;
-	char	**local_variables;
-	int		quote;
-	int		doublequote;
-} 	t_minishell;
-/// @brief // redirection type [0] is the input [1] is the output
-///// first file in the arrays of files are the executed ones
-
 typedef struct t_instructions
 {
 	char 	*command;
@@ -49,33 +27,73 @@ typedef struct t_instructions
 	int		to_file;
 }	t_instructions;
 
+typedef struct t_minishell
+{
+	t_instructions *instru;
+	int		number_of_commands;
+	int		(*fd_pipes)[2];
+	/// @pipe_location 0 is the command concerned 1 is write or read interaction
+	/// if value is 0 it's read otherwhise it's write
+	int		*pipe_location;
+	int		pipes_already_found;
+	char	*parsed_string;
+	char	**envp;
+	char	*before_from;
+	char	*before_to;
+	char	**local_variables;
+	int		quote;
+	int		doublequote;
+} 	t_minishell;
+/// @brief // redirection type [0] is the input [1] is the output
+///// first file in the arrays of files are the executed ones
+
+char	*remove_quote(char *string, char quote);
 void	child_process(t_minishell *minish, int parser);
-void    close_nested_stuff(t_minishell *minish);
 void 	close_stuff(t_minishell *minish);
-void	store_filename(t_minishell *minish, int pars,
+void	store(t_minishell *minish, int pars,
 	char *filename, char direction);
 int		get_string(t_minishell *minish, int where, int pars, char direction);
 void	skip_quotes(const char *str, int base_index, int *offset_index);
-int 	initialise(t_minishell *minish, char *string, int *nested);
 int 	count_commands(t_minishell *minish);
-int 	skip_nested_command(char *parsed_string, int index);
-int 	its_a_FILE(t_minishell minish, int index, char c);
 void 	pre_init_command(t_minishell *minish, int pars, int *where);
 int 	get_file_and_redirection(t_minishell *minish, int where, int pars);
-int 	set_up_redirection(t_minishell *minish, char *direction, int type, int pars);
+void 	set_up_redirection(t_minishell *minish, char direction, int type, int pars);
 int		get_Command(t_minishell *minish, int location, int *has_command, int pars);
 int		find_end_index(char *str, int where, char quote);
 int		is_stopper(char c);
+int		initialise(t_minishell *minish, char *string);
+
 int		skip_spaces(char *str, int where);
 int 	within_executable(t_minishell *minish, int i);
 int 	redirection(t_minishell *minish, int i);
 int 	not_quoted(t_minishell *minish);
 void 	nested(t_minishell *minish, int parser);
 int 	pipe_nested(t_minishell *minish, int length);
-void 	no_redirection_proc(t_minishell *minish, int parser, int can_to_pipe, int can_from_pipe);
-void 	access_test(t_minishell minish, int parser);
-void	execute(t_minishell minish, int parser);
+void 	no_redirection_proc(t_minishell *minish, int parser);
+void 	access_test(t_minishell *minish, int parser);
+void	execute(t_minishell *minish, int parser);
 void	process(t_minishell *minish);
 int		run(t_minishell *minish);
+void	error(t_minishell *minish, char *reason, int parser);
+void	ft_putstr_fd(char *s, int fd);
+size_t	ft_strlen(const char *s);
+char	*ft_strdup(const char *s1);
+void	store(t_minishell *minish, int pars,
+	char *filename, char direction);
+int	count_quote(char *string, char c);
+char	*ft_substr(char const *s, unsigned int start,
+	size_t len);
+////////////////////////////////// paths
+char	*path_finding(char *pathed, char **env);
+char	*potential_pathing(char *paths, char *command_to_path, int *index);
+int		find_string(char **env, char *path);
+char	*get_path(char *command_to_path, char *paths, int index);
+int	path_len(char *string, int index);
+void	putcommand(char *command_to_path, char *potential_path, int size);
+
+
+
+
+
 
 #endif

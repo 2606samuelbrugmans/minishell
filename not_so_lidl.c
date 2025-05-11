@@ -25,8 +25,7 @@ int	find_start(const char *str, int i)
 	char c;
 
 	c = str[i];
-
-	while (str[i] == 'c')
+	while (str[i] == c)
 		i++;
 	while (str[i] != '\0')
 	{
@@ -52,7 +51,7 @@ int	get_string(t_minishell *minish, int where, int pars, char direction)
 		quote = minish->parsed_string[where];
 	start = where;
 	end = find_end_index(minish->parsed_string, where, quote);
-	str = ft_substr(minish->parsed_string, start, end - start);
+	str = remove_quote(ft_substr(minish->parsed_string, start, end), quote);
 	store(minish, pars, str, direction);
 	if (quote && minish->parsed_string[end] == quote)
 		end++;
@@ -75,6 +74,7 @@ void	store(t_minishell *minish, int pars,
 	int n;
 
 	n = 0;
+
 	instr = &minish->instru[pars];
 	if (!filename)
 		return ;
@@ -91,9 +91,31 @@ void	store(t_minishell *minish, int pars,
 		else
 		{
 			n = number_strings(instr->executable);
-			realloc(instr->executable, (n + 2) * sizeof(char *));
-			instr->executable[n] = filename;
-			instr->executable[n + 1] = '\0';
+			instr->executable = realloc(instr->executable, (n + 2) * sizeof(char *));
 		}
+		instr->executable[n] = filename;
+		instr->executable[n + 1] = '\0';
 	}
+}
+char	*remove_quote(char *string, char quote)
+{
+	char *new;
+	int new_size;
+	int index;
+
+	if (quote == 0)
+		return (string);
+	index = 0;
+	new_size = ft_strlen(string);
+	new_size -= count_quote(string, quote);
+	new = malloc((new_size + 1) * sizeof(char));
+	if (!new)
+		return (NULL);
+	while (string[index] != '\0')
+	{
+		if (string[index] != quote)
+			*new++ = string[index];
+		index++;
+	}
+	return (new);
 }

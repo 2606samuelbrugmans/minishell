@@ -5,18 +5,23 @@ int	run(t_minishell *minish)
 	int i;
 
 	i = 0;
+
 	while (i < minish->number_of_commands)
 	{
 		if (pipe(minish->fd_pipes[i]) == -1 )
-			perrorr("bablda");
+			perror("bablda");
 		i++;
 	}
+	write(2,"5", 2);
+
 	process(minish);
+	return (0);
 }
 void	process(t_minishell *minish)
 {
 	pid_t	forked;
-	int parser;
+	int		parser;
+	int		index;
 	
 	parser = 0;
 	while (parser < minish->number_of_commands)
@@ -29,22 +34,21 @@ void	process(t_minishell *minish)
 		parser++;
 	}
 	close_stuff(minish);
-	close_nested_stuff(minish);
-	parser = 0;
-	while (parser < minish->number_of_commands)
+	index = 0;
+	while (index < minish->number_of_commands)
 	{
 		wait(NULL);
-		parser++;
+		index++;
 	}
 }
-void	execute(t_minishell minish, int parser)
+void	execute(t_minishell *minish, int parser)
 {
 	int	execror;
 
-	execror = execve(minish.instru[parser].path_command,
-		minish.instru[parser].executable, NULL);
+	execror = execve(minish->instru[parser].path_command,
+		minish->instru[parser].executable, NULL);
 	if (execror == -1)
-		error("execution failed", minish);
+		error(minish, "execution failed", parser);
 }
 /// 
 ///  no touch clean 
@@ -62,7 +66,7 @@ void access_test(t_minishell *minish, int parser)
 			if (access(minish->instru[parser].from_file_str[index], F_OK) == 0)
 			{
 				if (access(minish->instru[parser].from_file_str[index], R_OK) != 0)
-					error("permission denied:", minish, -1);
+					error(minish, "permission denied:", parser);
 				else
 					fd = open(minish->instru[parser].from_file_str[index], O_RDONLY);
 				if (index != minish->instru[parser].number_files_from - 1)
@@ -71,7 +75,7 @@ void access_test(t_minishell *minish, int parser)
 					minish->instru[parser].from_file = fd;
 			}
 			else
-				error("no such file or directory:", minish, -1);
+				error(minish, "no such file or directory:", parser);
 		}
 		index++;
 	}
@@ -81,7 +85,7 @@ void access_test(t_minishell *minish, int parser)
 		if (access(minish->instru[parser].to_file_str[index], F_OK) == 0)
 		{
 			if (access(minish->instru[parser].to_file_str[index], W_OK) != 0)
-				error("permission denied:", minish, -1);
+				error(minish, "permission denied:", parser);
 			if (minish->instru[parser].redirection_to[index] == 1)
 				fd = open(minish->instru[parser].to_file_str[index], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			else 
@@ -102,7 +106,7 @@ void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int ca
 
 	index_two = 0;
 	index = 0;
-	while (index < minish.pipes_already_found || index_two < minish.pipes_already_found) 
+	while (index <minish.pipes_already_found || index_two < minish.pipes_already_found) 
 	{
 		if (minish.pipe_location[index] == parser)
 			can_to_pipe = 1;
@@ -127,13 +131,8 @@ void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int ca
 }
 */
 
-void no_redirection_proc(t_minishell *minish, int parser, int can_to_pipe, int can_from_pipe)
+void no_redirection_proc(t_minishell *minish, int parser)
 {
-	int index;
-	int index_two;
-
-	index_two = 0;
-	index = 0;
 	if (minish->instru[parser].number_files_from != 0)
 		dup2(minish->fd_pipes[parser - 1][0], STDIN_FILENO);
 	else if (parser != 0)
@@ -142,18 +141,37 @@ void no_redirection_proc(t_minishell *minish, int parser, int can_to_pipe, int c
 		dup2(minish->fd_pipes[parser][1], STDOUT_FILENO);
 	else if (minish->instru[parser].number_files_to == 0 && parser < minish->number_of_commands - 1)
 		dup2(minish->instru[parser].to_file, STDOUT_FILENO);
-	else if (minish->nested[0] != 0)
-		dup2(minish->pipe_nested[minish->nested[0]][minish->nested[1]][1], STDOUT_FILENO);
 	close_stuff(minish);
-	close_nested_stuff(minish);
 }
 void	child_process(t_minishell *minish, int parser)
 {
 	// reduce the size for the norminette
 	// in the parsing should test if the path is absolute
-	nested(minish, parser);
+	/// nested(minish, parser);
+	if (access(minish->instru[parser].executable[0], F_OK) == 0)
+		minish->instru[parser].path_command = minish->instru[parser].executable[0];
+	else
+		minish->instru[parser].path_command = path_finding(minish->instru[parser].path_command, minish->envp);
 	access_test(minish, parser);
 	no_redirection_proc(minish, parser);
-	open_stuff(minish, parser);
-	execute(minish);
+	execute(minish, parser);
+}
+void	error(t_minishell *minish, char *reason, int parser)
+{
+	int	index;
+
+	index = 0;
+	ft_putstr_fd(reason, 2);
+	if (minish->instru[parser].path_command)
+		free(minish->instru[parser].path_command);
+	if (minish->instru[parser].executable)
+	{
+		while (minish->instru[parser].executable[index] != NULL)
+		{
+			free(minish->instru[parser].executable[index]);
+			index++;
+		}
+		free(minish->instru[parser].executable);
+	}
+	exit(-1);
 }
