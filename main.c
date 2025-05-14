@@ -88,6 +88,7 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 	int has_command;
 
 	/// we can deal with some parsing errors here
+	minish->instru[pars] = init_instructions(&minish->instru[pars]);
 	has_command = 0;
 	while (minish->parsed_string[*where])
 	{

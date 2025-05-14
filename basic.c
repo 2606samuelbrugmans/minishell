@@ -65,3 +65,19 @@ void	putcommand(char *command_to_path, char *potential_path, int size)
 		j++;
 	}
 }
+t_instructions *init_instructions(t_instructions *instr)
+{
+	instr->command = NULL;
+	instr->executable = NULL;
+	instr->path_command = NULL;
+	instr->number_files_to = 0;
+	instr->redirection_to = NULL;
+	instr->number_files_from = 0;
+	instr->redirection_from = NULL;
+	instr->from_file_str = NULL;
+	instr->from_file = -1;
+	instr->to_file_str = NULL;
+	instr->to_file = -1;
+
+	return instr;
+}

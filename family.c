@@ -130,18 +130,22 @@ void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int ca
 	close_stuff(minish, index, index_two);
 }
 */
-
 void no_redirection_proc(t_minishell *minish, int parser)
 {
 	if (minish->instru[parser].number_files_from != 0)
-		dup2(minish->fd_pipes[parser - 1][0], STDIN_FILENO);
-	else if (parser != 0)
 		dup2(minish->instru[parser].from_file, STDIN_FILENO);
+	else if (parser != 0)
+		dup2(minish->fd_pipes[parser - 1][0], STDIN_FILENO);
 	if  (minish->instru[parser].number_files_to != 0)
-		dup2(minish->fd_pipes[parser][1], STDOUT_FILENO);
-	else if (minish->instru[parser].number_files_to == 0 && parser < minish->number_of_commands - 1)
 		dup2(minish->instru[parser].to_file, STDOUT_FILENO);
+	else if (minish->instru[parser].number_files_to == 0 && parser < minish->number_of_commands - 1)
+		dup2(minish->fd_pipes[parser][1], STDOUT_FILENO);
 	close_stuff(minish);
+	if (minish->instru[parser].number_files_from != 0)
+		close(minish->instru[parser].from_file);
+	if (minish->instru[parser].number_files_from != 0)
+		close(minish->instru[parser].to_file);
+	
 }
 void	child_process(t_minishell *minish, int parser)
 {
