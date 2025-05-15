@@ -16,7 +16,6 @@ typedef struct t_instructions
 	char 	*command;
 	char	**executable;
 	char 	*path_command;
-	int 	absolute;
 	int		number_files_to;
 	int		*redirection_to;
 	int		number_files_from;
@@ -38,8 +37,6 @@ typedef struct t_minishell
 	int		pipes_already_found;
 	char	*parsed_string;
 	char	**envp;
-	char	*before_from;
-	char	*before_to;
 	char	**local_variables;
 	int		quote;
 	int		doublequote;

@@ -102,6 +102,7 @@ char	*remove_quote(char *string, char quote)
 	char *new;
 	int new_size;
 	int index;
+	int other_index;
 
 	if (quote == 0)
 		return (string);
@@ -109,13 +110,18 @@ char	*remove_quote(char *string, char quote)
 	new_size = ft_strlen(string);
 	new_size -= count_quote(string, quote);
 	new = malloc((new_size + 1) * sizeof(char));
+	other_index = 0;
 	if (!new)
 		return (NULL);
 	while (string[index] != '\0')
 	{
 		if (string[index] != quote)
-			*new++ = string[index];
+		{
+			new[other_index] = string[index];
+			other_index++;
+		}
 		index++;
 	}
+	new[other_index] = '\0';
 	return (new);
 }
