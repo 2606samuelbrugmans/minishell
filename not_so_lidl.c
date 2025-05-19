@@ -20,11 +20,8 @@ void skip_quotes(const char *str, int base_index, int *offset_index)
         i++; // Skip closing quote
     *offset_index = i - base_index;
 }
-int	find_start(const char *str, int i)
+int	find_start(const char *str, int i, char c)
 {
-	char c;
-
-	c = str[i];
 	while (str[i] == c)
 		i++;
 	while (str[i] != '\0')
@@ -45,16 +42,19 @@ int	get_string(t_minishell *minish, int where, int pars, char direction)
 	char	*str;
 
 	if (direction == '>' || direction == '<')
-		start = find_start(minish->parsed_string, where);
-	quote = 0;
-	if (minish->parsed_string[where] == '\'' || minish->parsed_string[where] == '"')
-		quote = minish->parsed_string[where];
+		start = find_start(minish->parsed_string, where, minish->parsed_string[where]);
+	quote = -1;
 	start = where;
-	end = find_end_index(minish->parsed_string, where, quote);
+	if (minish->parsed_string[where] == '\'' || minish->parsed_string[where] == '"')
+		quote = minish->parsed_string[start];
+	end = find_end_index(minish->parsed_string, start, quote);
 	str = remove_quote(ft_substr(minish->parsed_string, start, end), quote);
+	write(1, "\n", 2);
+	write(1, &direction, 1);
+	write(1, "\n", 2);
 	store(minish, pars, str, direction);
-	if (quote && minish->parsed_string[end] == quote)
-		end++;
+	if (minish->parsed_string[end] != '\0')
+		return (end + 1);
 	return (end);
 }
 int number_strings(char **array)
@@ -70,32 +70,31 @@ int number_strings(char **array)
 void	store(t_minishell *minish, int pars,
 	char *filename, char direction)
 {
-	t_instructions	*instr;
 	int n;
 
 	n = 0;
-
-	instr = &minish->instru[pars];
 	if (!filename)
 		return ;
 	if (direction == '>')
-		instr->to_file_str[instr->number_files_to - 1] = filename;
+		minish->instru[pars].to_file_str[minish->instru->number_files_to - 1] = filename;
 	else if (direction == '<')
-		instr->from_file_str[instr->number_files_from - 1] = filename;
+		minish->instru[pars].from_file_str[minish->instru->number_files_from - 1] = filename;
 	else if (direction == 'c')
-		instr->command = filename;
+		minish->instru[pars].command = filename;
 	if (direction == 'e' || direction == 'c')
 	{
+		printf(" %c",direction);
 		if (direction == 'c')
-			instr->executable = malloc(2 * sizeof(char *));
+			minish->instru[pars].executable = malloc(2 * sizeof(char *));
 		else
 		{
-			n = number_strings(instr->executable);
-			instr->executable = realloc(instr->executable, (n + 2) * sizeof(char *));
+			n = number_strings(minish->instru[pars].executable);
+			minish->instru[pars].executable = realloc(minish->instru[pars].executable, (n + 2) * sizeof(char *));
 		}
-		instr->executable[n] = filename;
-		instr->executable[n + 1] = '\0';
+		minish->instru[pars].executable[n] = filename;
+		minish->instru[pars].executable[n + 1] = '\0';
 	}
+	write(1, filename, ft_strlen(filename));
 }
 char	*remove_quote(char *string, char quote)
 {
@@ -104,7 +103,7 @@ char	*remove_quote(char *string, char quote)
 	int index;
 	int other_index;
 
-	if (quote == 0)
+	if (quote == -1)
 		return (string);
 	index = 0;
 	new_size = ft_strlen(string);

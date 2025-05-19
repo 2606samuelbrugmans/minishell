@@ -5,15 +5,13 @@ int	run(t_minishell *minish)
 	int i;
 
 	i = 0;
-
+	print_minishell(minish);
 	while (i < minish->number_of_commands)
 	{
 		if (pipe(minish->fd_pipes[i]) == -1 )
 			perror("bablda");
 		i++;
 	}
-	write(2,"5", 2);
-
 	process(minish);
 	return (0);
 }
@@ -97,6 +95,7 @@ void access_test(t_minishell *minish, int parser)
 		}
 		index++;
 	}
+	write(2, "accessed", 9);
 }
 /*
 void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int can_from_pipe)

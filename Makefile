@@ -8,6 +8,8 @@ SRCS = family.c \
 		basic.c \
 		main.c \
 		path.c \
+		basic2.c \
+		debug_shit.c
 	
 
 NAME = minishell

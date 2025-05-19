@@ -87,6 +87,10 @@ int		find_string(char **env, char *path);
 char	*get_path(char *command_to_path, char *paths, int index);
 int	path_len(char *string, int index);
 void	putcommand(char *command_to_path, char *potential_path, int size);
+t_instructions init_instructions(t_instructions instr);
+/////////////// debug
+void print_minishell(t_minishell *minish);
+void print_instructions(t_instructions *instr);
 
 
 

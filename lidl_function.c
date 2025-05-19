@@ -8,7 +8,7 @@ int not_quoted(t_minishell *minish)
 int redirection(t_minishell *minish, int i)
 {
     if ((minish->parsed_string[i] == '>'
-         || minish->parsed_string[i] == '<') && not_quoted(minish))
+        || minish->parsed_string[i] == '<'))
         return (0);
     return (-1);
 }
@@ -35,17 +35,17 @@ int	find_end_index(char *str, int where, char quote)
 {
 	int quo;
 
-	quo == 1;
-	if (quote == 0)
+	quo = 1;
+	if (quote == -1)
 	{
-		while (str[where])
+		while (str[where] != '\0')
 		{
 			if (is_stopper(str[where]))
-				return (where-1)
+				return (where -1);
 			where++;
 		}
 	}
-	while (str[where])
+	while (str[where] != '\0')
 	{
 		if (str[where] == quote)
 			quo++;

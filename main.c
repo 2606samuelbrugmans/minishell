@@ -31,7 +31,7 @@ int	get_Command(t_minishell *minish, int location, int *has_command, int pars)
 
 	index = 0;
 	if (*has_command == 0)
-		index = get_string(minish, location, pars,'c');
+		index = get_string(minish, location, pars, 'c');
 	else 
 		index = get_string(minish, location, pars, 'e');
 	*has_command = 1;
@@ -79,6 +79,7 @@ int get_file_and_redirection(t_minishell *minish, int where, int pars)
 		set_up_redirection(minish, '<', 1, pars);
 	else if (minish->parsed_string[where] == '>')
 		set_up_redirection(minish, '>', 1, pars);
+	write(1, "tut tes fais encule", 20);
 	where = get_string(minish, where, pars, minish->parsed_string[where]);
 	
 	return (where);
@@ -88,16 +89,19 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 	int has_command;
 
 	/// we can deal with some parsing errors here
-	minish->instru[pars] = init_instructions(&minish->instru[pars]);
+	write(2, "sexestr\n", 9);
+
+	minish->instru[pars] = init_instructions(minish->instru[pars]);
 	has_command = 0;
+	write(2, "sexe1", 6);
 	while (minish->parsed_string[*where])
 	{
-		if (redirection(minish, *where))
+		if ((minish->parsed_string[*where] == '|'))
+			break;
+		if (redirection(minish, *where) == 0)
 			(*where) = get_file_and_redirection(minish, *where, pars);
 		else if (minish->parsed_string[*where] != ' ')
 			(*where) = get_Command(minish, *where, &has_command, pars);
-		if ((minish->parsed_string[*where] == '|'))
-			break;
 		(*where)++;
 	}
 }
@@ -220,7 +224,7 @@ int initialise(t_minishell *minish, char *string)
 	minish->doublequote = 0;
 	minish->quote = 0;
 	minish->number_of_commands = count_commands(minish);
-	minish->instru = malloc((minish->number_of_commands) * sizeof(t_instructions));
+	minish->instru = malloc(minish->number_of_commands * sizeof(t_instructions));
 	pars = 0;
 	where = 0;
 	while (pars < minish->number_of_commands)
@@ -250,6 +254,7 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		*/
 		initialise(minish, string);
+
 		run(minish);
 	}
 	/*
