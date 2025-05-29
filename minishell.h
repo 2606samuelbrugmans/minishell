@@ -56,7 +56,7 @@ void 	pre_init_command(t_minishell *minish, int pars, int *where);
 int 	get_file_and_redirection(t_minishell *minish, int where, int pars);
 void 	set_up_redirection(t_minishell *minish, char direction, int type, int pars);
 int		get_Command(t_minishell *minish, int location, int *has_command, int pars);
-int		find_end_index(char *str, int where, char quote);
+int		find_end_index(char *str, int where, char *quote);
 int		is_stopper(char c);
 int		initialise(t_minishell *minish, char *string);
 

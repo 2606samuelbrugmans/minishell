@@ -42,13 +42,18 @@ int	get_string(t_minishell *minish, int where, int pars, char direction)
 	char	*str;
 
 	if (direction == '>' || direction == '<')
+	{
 		start = find_start(minish->parsed_string, where, minish->parsed_string[where]);
+		printf("\nstart is %d\n", start);
+	}
+	else 
+		start = where;
 	quote = -1;
-	start = where;
+	where = start;
 	if (minish->parsed_string[where] == '\'' || minish->parsed_string[where] == '"')
-		quote = minish->parsed_string[start];
-	end = find_end_index(minish->parsed_string, start, quote);
-	str = remove_quote(ft_substr(minish->parsed_string, start, end), quote);
+		quote = minish->parsed_string[where];
+	end = find_end_index(minish->parsed_string, where, &quote);
+	str = remove_quote(ft_substr(minish->parsed_string, where, end), quote);
 	write(1, "\n", 2);
 	write(1, &direction, 1);
 	write(1, "\n", 2);
@@ -92,7 +97,7 @@ void	store(t_minishell *minish, int pars,
 			minish->instru[pars].executable = realloc(minish->instru[pars].executable, (n + 2) * sizeof(char *));
 		}
 		minish->instru[pars].executable[n] = filename;
-		minish->instru[pars].executable[n + 1] = '\0';
+		minish->instru[pars].executable[n + 1] = NULL;
 	}
 	write(1, filename, ft_strlen(filename));
 }

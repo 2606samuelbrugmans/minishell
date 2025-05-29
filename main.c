@@ -44,11 +44,19 @@ void	set_up_redirection(t_minishell *minish, char direction, int type, int pars)
 	{
 		minish->instru[pars].number_files_from++;
 		if (minish->instru[pars].number_files_from == 1)
+		{
 			minish->instru[pars].redirection_from = malloc(1 * sizeof(int));
-		else 
+			minish->instru[pars].from_file_str = malloc(1 * sizeof(char *));
+		}
+		else
+		{
 			minish->instru[pars].redirection_from
 			= realloc(minish->instru[pars].redirection_from,
 				minish->instru[pars].number_files_from * sizeof(int));
+			minish->instru[pars].from_file_str
+			= realloc(minish->instru[pars].from_file_str,
+				minish->instru[pars].number_files_from * sizeof(char *));
+		}
 		minish->instru[pars].redirection_from[minish->instru[pars].number_files_from - 1]
 		= type;
 	}
@@ -56,11 +64,19 @@ void	set_up_redirection(t_minishell *minish, char direction, int type, int pars)
 	{
 		minish->instru[pars].number_files_to++;
 		if (minish->instru[pars].number_files_to == 1)
+		{
 			minish->instru[pars].redirection_to = malloc(1 * sizeof(int));
-		else 
+			minish->instru[pars].to_file_str  = malloc(1 * sizeof(char *));
+		}
+		else
+		{
 			minish->instru[pars].redirection_to
 			= realloc(minish->instru[pars].redirection_to,
 			minish->instru[pars].number_files_to * sizeof(int));
+			minish->instru[pars].to_file_str
+			= realloc(minish->instru[pars].to_file_str, 
+				minish->instru[pars].number_files_to * sizeof(char *));
+		}
 		minish->instru[pars].redirection_to[minish->instru[pars].number_files_to - 1]
 		= type;
 	}
@@ -79,7 +95,6 @@ int get_file_and_redirection(t_minishell *minish, int where, int pars)
 		set_up_redirection(minish, '<', 1, pars);
 	else if (minish->parsed_string[where] == '>')
 		set_up_redirection(minish, '>', 1, pars);
-	write(1, "tut tes fais encule", 20);
 	where = get_string(minish, where, pars, minish->parsed_string[where]);
 	
 	return (where);
@@ -89,14 +104,12 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 	int has_command;
 
 	/// we can deal with some parsing errors here
-	write(2, "sexestr\n", 9);
 
 	minish->instru[pars] = init_instructions(minish->instru[pars]);
 	has_command = 0;
-	write(2, "sexe1", 6);
-	while (minish->parsed_string[*where])
+	while (minish->parsed_string[*where] != '\0')
 	{
-		if ((minish->parsed_string[*where] == '|'))
+		if (minish->parsed_string[*where] == '|')
 			break;
 		if (redirection(minish, *where) == 0)
 			(*where) = get_file_and_redirection(minish, *where, pars);
@@ -254,7 +267,6 @@ int main(int argc, char **argv, char **envp)
 			continue;
 		*/
 		initialise(minish, string);
-
 		run(minish);
 	}
 	/*

@@ -4,6 +4,7 @@ void print_instructions(t_instructions *instr)
 	printf("Executable: ");
     if (instr->executable) {
         for (int i = 0; instr->executable[i] != NULL; i++) {
+            printf("\n executable %d", i);
             printf("%s ", instr->executable[i]);
         }
     } else {
@@ -120,3 +121,9 @@ void print_minishell(t_minishell *minish)
         print_instructions(&minish->instru[i]);
     }
 }
+/*
+void give_minishell(t_minishell *minish)
+{
+    
+}
+*/

@@ -5,6 +5,7 @@ int	run(t_minishell *minish)
 	int i;
 
 	i = 0;
+	//// give_minishell(minish);
 	print_minishell(minish);
 	while (i < minish->number_of_commands)
 	{
@@ -156,7 +157,9 @@ void	child_process(t_minishell *minish, int parser)
 	else
 		minish->instru[parser].path_command = path_finding(minish->instru[parser].path_command, minish->envp);
 	access_test(minish, parser);
+	write(2, minish->instru[parser].path_command, ft_strlen(minish->instru[parser].path_command));
 	no_redirection_proc(minish, parser);
+	write(2, "\n ready to kill\n", 17);
 	execute(minish, parser);
 }
 void	error(t_minishell *minish, char *reason, int parser)

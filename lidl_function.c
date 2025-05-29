@@ -31,27 +31,29 @@ int	is_stopper(char c)
 	return (c == ' ' || c == '|' || c == '<' || c == '>' || c == '\0');
 } 
 
-int	find_end_index(char *str, int where, char quote)
+int	find_end_index(char *str, int where, char *quote)
 {
 	int quo;
 
-	quo = 1;
-	if (quote == -1)
+	quo = 0;
+	if (str[where] == *quote)
 	{
-		while (str[where] != '\0')
-		{
-			if (is_stopper(str[where]))
-				return (where -1);
-			where++;
-		}
+		where++;
+		quo++;
 	}
 	while (str[where] != '\0')
 	{
-		if (str[where] == quote)
+
+		if ((*quote == -1) && (str[where] == '\"' || str[where] == '\''))
+			*quote = str[where];
+		if (str[where] == *quote)
 			quo++;
-		if (quo % 2 == 0 && is_stopper(str[where]))
-			return (where - 1);
+		if (*quote == -1 && is_stopper(str[where]))
+			return (where);
+		if (*quote != -1 && quo % 2 == 0 && is_stopper(str[where]))
+			return (where);
 		where++;
 	}
+	printf("trolled");
 	return (where);
 }
