@@ -127,3 +127,60 @@ void give_minishell(t_minishell *minish)
     
 }
 */
+
+void init_minishell(t_minishell *minish) {
+    if (!minish)
+        return;
+    minish->number_of_commands = 1;
+
+    // Pipe locations (terminated with -1)
+    minish->pipe_location = malloc(2 * sizeof(int));
+    minish->pipe_location[0] = 0;
+    minish->pipe_location[1] = -1;
+
+    minish->pipes_already_found = 1;
+    minish->parsed_string = strdup("ls -la | grep txt");
+
+    // Environment variables
+
+    // Local variables
+    minish->local_variables = malloc(2 * sizeof(char *));
+    minish->local_variables[0] = strdup("VAR=value");
+    minish->local_variables[1] = NULL;
+
+    minish->quote = 0;
+    minish->doublequote = 0;
+
+    // Allocate instruction array
+    minish->instru = malloc(minish->number_of_commands * sizeof(t_instructions));
+
+    // Fill in one instruction manually
+    t_instructions *instr = &minish->instru[0];
+
+    instr->executable = malloc(3 * sizeof(char *));
+    instr->executable[0] = strdup("ls");
+    instr->executable[1] = strdup("-la");
+    instr->executable[2] = NULL;
+
+    instr->command = strdup("ls -la");
+    instr->path_command = strdup("/bin/ls");
+
+    instr->number_files_to = 1;
+    instr->redirection_to = malloc(sizeof(int));
+    instr->redirection_to[0] = 1;
+
+    instr->number_files_from = 1;
+    instr->redirection_from = malloc(sizeof(int));
+    instr->redirection_from[0] = 0;
+
+    instr->from_file = 0;
+    instr->to_file = 1;
+
+    instr->from_file_str = malloc(2 * sizeof(char *));
+    instr->from_file_str[0] = strdup("input.txt");
+    instr->from_file_str[1] = NULL;
+
+    instr->to_file_str = malloc(2 * sizeof(char *));
+    instr->to_file_str[0] = strdup("output.txt");
+    instr->to_file_str[1] = NULL;
+}
