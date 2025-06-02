@@ -59,7 +59,7 @@ int		get_Command(t_minishell *minish, int location, int *has_command, int pars);
 int		find_end_index(char *str, int where, char *quote);
 int		is_stopper(char c);
 int		initialise(t_minishell *minish, char *string);
-
+void	init_minishell(t_minishell *minish);
 int		skip_spaces(char *str, int where);
 int 	within_executable(t_minishell *minish, int i);
 int 	redirection(t_minishell *minish, int i);

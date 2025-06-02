@@ -250,26 +250,28 @@ int initialise(t_minishell *minish, char *string)
 
 int main(int argc, char **argv, char **envp)
 {
-	char 			*prompt;
-	char 			*string;
+	///char 			*prompt;
+	///char 			*string;
 	t_minishell		*minish;
 
+	if (!envp)
+		return (-1);
 	if (argc != 1 || !argv)
 		return (-1);
-	prompt = ft_strdup("");
+	///prompt = ft_strdup("");
 	minish = malloc(1 * sizeof(t_minishell));
+	init_minishell(minish);
+	run(minish);
+	/*
 	while (1)
 	{
 		minish->envp = envp;
-		string = readline(prompt);
-		/*
+		///string = readline(prompt);
 		if (parsing_errors(minish) != 0)
 			continue;
-		*/
-		initialise(minish, string);
+		init_minishell(minish);
 		run(minish);
 	}
-	/*
 	free_everything(minish);
 	*/
 	return (0);

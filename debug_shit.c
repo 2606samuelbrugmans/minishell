@@ -74,23 +74,10 @@ void print_minishell(t_minishell *minish)
         printf("t_minishell is NULL\n");
         return;
     }
-
     printf("Number of commands: %d\n", minish->number_of_commands);
-
-    printf("Pipe locations: ");
-    if (minish->pipe_location) {
-        for (int i = 0; minish->pipe_location[i] != -1; i++) {
-            printf("%d ", minish->pipe_location[i]);
-        }
-    } else {
-        printf("NULL");
-    }
     printf("\n");
-
     printf("Pipes already found: %d\n", minish->pipes_already_found);
-
     printf("Parsed String: %s\n", minish->parsed_string ? minish->parsed_string : "NULL");
-
     printf("Environment Variables: ");
     if (minish->envp) {
         for (int i = 0; minish->envp[i] != NULL; i++) {
@@ -131,15 +118,13 @@ void give_minishell(t_minishell *minish)
 void init_minishell(t_minishell *minish) {
     if (!minish)
         return;
-    minish->number_of_commands = 1;
+    minish->number_of_commands = 2;
 
     // Pipe locations (terminated with -1)
-    minish->pipe_location = malloc(2 * sizeof(int));
-    minish->pipe_location[0] = 0;
-    minish->pipe_location[1] = -1;
+    minish->fd_pipes = malloc(minish->number_of_commands * sizeof(int[2]));
+   
 
-    minish->pipes_already_found = 1;
-    minish->parsed_string = strdup("ls -la | grep txt");
+    minish->parsed_string = strdup("< input.txt ls -la | grep txt > output.txt");
 
     // Environment variables
 
@@ -163,24 +148,52 @@ void init_minishell(t_minishell *minish) {
     instr->executable[2] = NULL;
 
     instr->command = strdup("ls -la");
-    instr->path_command = strdup("/bin/ls");
+    instr->path_command = strdup("/usr/bin/ls");
 
-    instr->number_files_to = 1;
-    instr->redirection_to = malloc(sizeof(int));
-    instr->redirection_to[0] = 1;
-
+    
+    //instr->number_files_to = 1;
+    //instr->redirection_to = malloc(sizeof(int));
+  //  instr->redirection_to[0] = 1;
     instr->number_files_from = 1;
     instr->redirection_from = malloc(sizeof(int));
-    instr->redirection_from[0] = 0;
-
-    instr->from_file = 0;
-    instr->to_file = 1;
-
+    instr->redirection_from[0] = 1;
+    instr->from_file = 1;
+    //instr->to_file = 0;
     instr->from_file_str = malloc(2 * sizeof(char *));
     instr->from_file_str[0] = strdup("input.txt");
     instr->from_file_str[1] = NULL;
 
-    instr->to_file_str = malloc(2 * sizeof(char *));
+    /*instr->to_file_str = malloc(2 * sizeof(char *));
     instr->to_file_str[0] = strdup("output.txt");
     instr->to_file_str[1] = NULL;
+    */
+
+    t_instructions *instro = &minish->instru[1];
+    instro->executable = malloc(3 * sizeof(char *));
+    instro->executable[0] = strdup("grep");
+    instro->executable[1] = strdup("txt");
+    instro->executable[2] = NULL;
+
+    instro->command = strdup("grep");
+    instro->path_command = strdup("/usr/bin/grep");
+
+    instro->number_files_to = 1;
+
+    instro->redirection_to = malloc(sizeof(int));
+    instro->redirection_to[0] = 1;
+    instro->number_files_from = 0;
+    /*
+    instro->redirection_from = malloc(sizeof(int));
+    instro->redirection_from[0] = 0;
+    */
+    instro->from_file = 0;
+    instro->to_file = 1;
+    /*
+    instr->from_file_str = malloc(2 * sizeof(char *));
+    instr->from_file_str[0] = strdup("input.txt");
+    instr->from_file_str[1] = NULL;
+    */
+    instro->to_file_str = malloc(2 * sizeof(char *));
+    instro->to_file_str[0] = strdup("output.txt");
+    instro->to_file_str[1] = NULL;
 }
