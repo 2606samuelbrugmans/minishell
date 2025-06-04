@@ -68,7 +68,11 @@ void access_test(t_minishell *minish, int parser)
 				if (access(minish->instru[parser].from_file_str[index], R_OK) != 0)
 					error(minish, "permission denied:", parser);
 				else
+				{
 					fd = open(minish->instru[parser].from_file_str[index], O_RDONLY);
+					if (fd == -1)
+						error(minish, "couldn't open file", parser);
+				}
 				if (index != minish->instru[parser].number_files_from - 1)
 					close(fd);
 				else 
@@ -145,7 +149,7 @@ void no_redirection_proc(t_minishell *minish, int parser)
 	close_stuff(minish);
 	if (minish->instru[parser].number_files_from != 0)
 		close(minish->instru[parser].from_file);
-	if (minish->instru[parser].number_files_from != 0)
+	if (minish->instru[parser].number_files_to != 0)
 		close(minish->instru[parser].to_file);
 	
 }
