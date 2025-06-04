@@ -44,9 +44,10 @@ typedef struct t_minishell
 /// @brief // redirection type [0] is the input [1] is the output
 ///// first file in the arrays of files are the executed ones
 
+void 	close_parent(t_minishell *minish);
 char	*remove_quote(char *string, char quote);
 void	child_process(t_minishell *minish, int parser);
-void 	close_stuff(t_minishell *minish);
+void	close_stuff(t_minishell *minish, int parser);
 void	store(t_minishell *minish, int pars,
 	char *filename, char direction);
 int		get_string(t_minishell *minish, int where, int pars, char direction);

@@ -21,7 +21,6 @@ void	process(t_minishell *minish)
 	pid_t	forked;
 	int		parser;
 	int		index;
-	write(2, "being processed", 16);
 	
 	parser = 0;
 	while (parser < minish->number_of_commands)
@@ -33,8 +32,8 @@ void	process(t_minishell *minish)
 			child_process(minish, parser);
 		parser++;
 	}
-	close_stuff(minish);
 	index = 0;
+	close_parent(minish);
 	while (index < minish->number_of_commands)
 	{
 		wait(NULL);
@@ -58,7 +57,6 @@ void access_test(t_minishell *minish, int parser)
 	int fd;
 
 	index = 0;
-	/// i need to know if i can have redirections in the middle of the command i think i can
 	while (minish->instru[parser].number_files_from > index)
 	{
 		if (minish->instru[parser].redirection_from[index] == 1)
@@ -69,7 +67,7 @@ void access_test(t_minishell *minish, int parser)
 					error(minish, "permission denied:", parser);
 				else
 				{
-					fd = open(minish->instru[parser].from_file_str[index], O_RDONLY);
+					fd = open(minish->instru[parser].from_file_str[index], O_RDONLY, 777);
 					if (fd == -1)
 						error(minish, "couldn't open file", parser);
 				}
@@ -92,9 +90,17 @@ void access_test(t_minishell *minish, int parser)
 				error(minish, "permission denied:", parser);
 		}
 		if (minish->instru[parser].redirection_to[index] == 1)
+		{
 			fd = open(minish->instru[parser].to_file_str[index], O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		else 
+			if (fd == -1)
+				error(minish, "couldn't open file", parser);
+		}
+		else
+		{
 			fd = open(minish->instru[parser].to_file_str[index], O_WRONLY | O_CREAT | O_APPEND, 0644);
+			if (fd == -1)
+				error(minish, "couldn't open file", parser);
+		}
 		if (index != minish->instru[parser].number_files_to - 1)
 			close(fd);
 		else 
@@ -103,38 +109,7 @@ void access_test(t_minishell *minish, int parser)
 	}
 	write(2, "accessed", 9);
 }
-/*
-void no_redirection_proc(t_minishell minish, int parser, int can_to_pipe, int can_from_pipe)
-{
-	int index;
-	int index_two;
 
-	index_two = 0;
-	index = 0;
-	while (index <minish.pipes_already_found || index_two < minish.pipes_already_found) 
-	{
-		if (minish.pipe_location[index] == parser)
-			can_to_pipe = 1;
-		else if (minish.pipe_location[index] == parser - 1)
-			can_from_pipe = 1;
-		if (can_to_pipe != 1)
-			index++;
-		if (can_from_pipe != 1)
-			index_two++;
-		if (can_to_pipe == 1 || can_from_pipe == 1)
-			break;
-	}
-	if (minish.instru[parser].number_files_from == 0 && can_from_pipe == 1 )
-		dup2(minish.fd_pipes[index_two][0], STDIN_FILENO);
-	else if (minish.instru[parser].number_files_from != 0)
-		dup2(minish.instru[parser].from_file, STDIN_FILENO);
-	if  (minish.instru[parser].number_files_to == 0 && can_to_pipe == 1)
-		dup2(minish.fd_pipes[index][1], STDOUT_FILENO);
-	else if (minish.instru[parser].number_files_to != 0)
-		dup2(minish.instru[parser].to_file, STDOUT_FILENO);
-	close_stuff(minish, index, index_two);
-}
-*/
 void no_redirection_proc(t_minishell *minish, int parser)
 {
 	write(2, "reached no redirection", 23);
@@ -146,31 +121,30 @@ void no_redirection_proc(t_minishell *minish, int parser)
 		dup2(minish->instru[parser].to_file, STDOUT_FILENO);
 	else if (minish->instru[parser].number_files_to == 0 && parser != minish->number_of_commands - 1)
 		dup2(minish->fd_pipes[parser][1], STDOUT_FILENO);
-	close_stuff(minish);
+	close_stuff(minish, parser);
 	if (minish->instru[parser].number_files_from != 0)
 		close(minish->instru[parser].from_file);
 	if (minish->instru[parser].number_files_to != 0)
 		close(minish->instru[parser].to_file);
-	
 }
+
 void	child_process(t_minishell *minish, int parser)
 {
 	// reduce the size for the norminette
 	// in the parsing should test if the path is absolute
 	/// nested(minish, parser);
-	write(2, "hi", 2);
 	/*
 	if (access(minish->instru[parser].executable[0], F_OK) == 0)
 		minish->instru[parser].path_command = minish->instru[parser].executable[0];
 	else
 		minish->instru[parser].path_command = path_finding(minish->instru[parser].path_command, minish->envp);
 	*/
-	write(2, "sexe", 4);
 	access_test(minish, parser);
 	no_redirection_proc(minish, parser);
 	write(2, "\n ready to kill\n", 17);
 	execute(minish, parser);
 }
+
 void	error(t_minishell *minish, char *reason, int parser)
 {
 	int	index;
