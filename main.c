@@ -81,9 +81,9 @@ void	set_up_redirection(t_minishell *minish, char direction, int type, int pars)
 		= type;
 	}
 }
+
 int get_file_and_redirection(t_minishell *minish, int where, int pars)
 {
-
 	if (minish->parsed_string[where] == minish->parsed_string[where +1])
 	{
 		if (minish->parsed_string[where] == '<')
@@ -104,7 +104,6 @@ void pre_init_command(t_minishell *minish, int pars, int *where)
 	int has_command;
 
 	/// we can deal with some parsing errors here
-
 	minish->instru[pars] = init_instructions(minish->instru[pars]);
 	has_command = 0;
 	while (minish->parsed_string[*where] != '\0')
@@ -260,6 +259,7 @@ int main(int argc, char **argv, char **envp)
 		return (-1);
 	///prompt = ft_strdup("");
 	minish = malloc(1 * sizeof(t_minishell));
+	minish->envp = envp;
 	init_minishell(minish);
 	run(minish);
 	/*

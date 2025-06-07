@@ -82,7 +82,30 @@ t_instructions init_instructions(t_instructions instr)
 
 	return (instr);
 }
+void	ft_putnbr_fd(int n, int fd)
+{
+	char	c;
 
+	if (n >= 0 && n <= 9)
+	{
+		c = (n % 10) + 48;
+		write(fd, &c, 1);
+	}
+	else if (n == -2147483648)
+		write(fd, "-2147483648", 12);
+	else if (n < 0)
+	{
+		n *= -1;
+		write(fd, "-", 1);
+		ft_putnbr_fd(n, fd);
+	}
+	else
+	{
+		c = (n % 10) + 48;
+		ft_putnbr_fd(n / 10, fd);
+		write(fd, &c, 1);
+	}
+}
 void	ft_putstr_fd(char *s, int fd)
 {
 	int	index;

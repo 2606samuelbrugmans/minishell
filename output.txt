@@ -1,3 +1,0 @@
--rw-r--r-- 1 sbrugman 2024_s19    42 Jun  2 18:22 input.txt
--rw-r--r-- 1 sbrugman 2024_s19     0 Jun  4 20:47 output.txt
--rw-r--r-- 1 sbrugman 2024_s19    96 May 10 17:09 tests.txt

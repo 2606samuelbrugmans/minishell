@@ -50,6 +50,7 @@ void	child_process(t_minishell *minish, int parser);
 void	close_stuff(t_minishell *minish, int parser);
 void	store(t_minishell *minish, int pars,
 	char *filename, char direction);
+void	ft_putnbr_fd(int n, int fd);
 int		get_string(t_minishell *minish, int where, int pars, char direction);
 void	skip_quotes(const char *str, int base_index, int *offset_index);
 int 	count_commands(t_minishell *minish);
@@ -81,6 +82,8 @@ void	store(t_minishell *minish, int pars,
 int	count_quote(char *string, char c);
 char	*ft_substr(char const *s, unsigned int start,
 	size_t len);
+int	ft_strcmp(const char *s1, const char *s2);
+
 ////////////////////////////////// paths
 char	*path_finding(char *pathed, char **env);
 char	*potential_pathing(char *paths, char *command_to_path, int *index);

@@ -73,7 +73,7 @@ void access_test(t_minishell *minish, int parser)
 				}
 				if (index != minish->instru[parser].number_files_from - 1)
 					close(fd);
-				else 
+				else
 					minish->instru[parser].from_file = fd;
 			}
 			else
@@ -133,12 +133,12 @@ void	child_process(t_minishell *minish, int parser)
 	// reduce the size for the norminette
 	// in the parsing should test if the path is absolute
 	/// nested(minish, parser);
-	/*
+	if (ft_strcmp(minish->instru[parser].executable[0],"echo") == 0)
+		minish->instru[parser].path_command = "/usr/bin/echo";
 	if (access(minish->instru[parser].executable[0], F_OK) == 0)
 		minish->instru[parser].path_command = minish->instru[parser].executable[0];
 	else
-		minish->instru[parser].path_command = path_finding(minish->instru[parser].path_command, minish->envp);
-	*/
+		minish->instru[parser].path_command = path_finding(minish->instru[parser].executable[0], minish->envp);
 	access_test(minish, parser);
 	no_redirection_proc(minish, parser);
 	write(2, "\n ready to kill\n", 17);

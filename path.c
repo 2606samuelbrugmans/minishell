@@ -8,7 +8,7 @@ char	*path_finding(char *pathed, char **env)
 	path = find_string(env, "PATH");
 	if (path == -1)
 		return (NULL);
-	full_path = get_path(pathed, env[path], 5);
+	ft_putnbr_fd(path, 2);
 	full_path = get_path(pathed, env[path], 5);
 	return (full_path);
 }

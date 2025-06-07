@@ -21,10 +21,10 @@ void print_instructions(t_instructions *instr)
     printf("Number of files to: %d\n", instr->number_files_to);
 
     printf("Redirection To: ");
-    if (instr->redirection_to) {
-        for (int i = 0; i < instr->number_files_to; i++) {
+    if (instr->redirection_to) 
+    {
+        for (int i = 0; i < instr->number_files_to; i++)
             printf("%d ", instr->redirection_to[i]);
-        }
     } else {
         printf("NULL");
     }
@@ -57,14 +57,11 @@ void print_instructions(t_instructions *instr)
     printf("To File Strings: ");
     if (instr->to_file_str) {
         for (int i = 0; instr->to_file_str[i] != NULL; i++)
-        {
             printf("%s ", instr->to_file_str[i]);
-        }
+
     }
     else
-    {
         printf("NULL");
-    }
     printf("\n");
     printf("\n");
 }
@@ -72,7 +69,8 @@ void print_instructions(t_instructions *instr)
 // Function to print the contents of t_minishell
 void print_minishell(t_minishell *minish)
 {
-    if (minish == NULL) {
+    if (minish == NULL)
+    {
         printf("t_minishell is NULL\n");
         return;
     }
@@ -111,13 +109,14 @@ void print_minishell(t_minishell *minish)
     }
 }
 
-void init_minishell(t_minishell *minish) {
+void init_minishell(t_minishell *minish)
+{
     if (!minish)
         return;
     minish->number_of_commands = 2;
     // Pipe locations (terminated with -1)
     minish->fd_pipes = malloc((minish->number_of_commands -1) * sizeof(int[2]));
-    minish->parsed_string = strdup("< input.txt ls -la | grep txt > output.txt");
+    minish->parsed_string = strdup("env | cat >output.txt");
     // Environment variables
     // Local variables
     minish->local_variables = malloc(2 * sizeof(char *));
@@ -129,34 +128,31 @@ void init_minishell(t_minishell *minish) {
     minish->instru = malloc(minish->number_of_commands * sizeof(t_instructions));
     // Fill in one instruction manually
     t_instructions *instr = &minish->instru[0];
-    instr->executable = malloc(3 * sizeof(char *));
-    instr->executable[0] = strdup("ls");
-    instr->executable[1] = strdup("-la");
-    instr->executable[2] = NULL;
-    instr->command = strdup("ls -la");
-    instr->path_command = strdup("/usr/bin/ls");
-    //instr->number_files_to = 1;
+    instr->executable = malloc(2 * sizeof(char *));
+    instr->executable[0] = strdup("env");
+    instr->executable[1] = NULL;
+    instr->command = strdup("env");
+    //instr->path_command = strdup("/usr/bin/ls");
+    instr->number_files_to = 0;
     //instr->redirection_to = malloc(sizeof(int));
-    //instr->redirection_to[0] = 1;
-    instr->number_files_from = 1;
-    instr->redirection_from = malloc(sizeof(int));
-    instr->redirection_from[0] = 1;
-    instr->from_file = 1;
-    //instr->to_file = 0;
-    instr->from_file_str = malloc(2 * sizeof(char *));
-    instr->from_file_str[0] = strdup("input.txt");
-    instr->from_file_str[1] = NULL;
-    /*instr->to_file_str = malloc(2 * sizeof(char *));
-    instr->to_file_str[0] = strdup("output.txt");
-    instr->to_file_str[1] = NULL;
-    */
+    //instr->redirection_to[0] = 0;
+    //instr->number_files_from = 0;
+    //instr->redirection_from = malloc(sizeof(int));
+    //instr->redirection_from[0] = 1;
+    instr->from_file = 0;
+    instr->to_file = 0;
+    //instr->from_file_str = malloc(2 * sizeof(char *));
+    //instr->from_file_str[0] = strdup("input.txt");
+    //instr->from_file_str[1] = NULL;
+    //instr->to_file_str = malloc(2 * sizeof(char *));
+    //instr->to_file_str[0] = strdup("output.txt");
+    //instr->to_file_str[1] = NULL;
+    
     t_instructions *instro = &minish->instru[1];
-    instro->executable = malloc(3 * sizeof(char *));
-    instro->executable[0] = strdup("grep");
-    instro->executable[1] = strdup("txt");
-    instro->executable[2] = NULL;
-    instro->command = strdup("grep");
-    instro->path_command = strdup("/usr/bin/grep");
+    instro->executable = malloc(2 * sizeof(char *));
+    instro->executable[0] = strdup("cat");
+    instro->executable[1] = NULL;
+    instro->command = strdup("cat");
     instro->number_files_to = 1;
     instro->redirection_to = malloc(sizeof(int));
     instro->redirection_to[0] = 1;
