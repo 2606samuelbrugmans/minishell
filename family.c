@@ -6,14 +6,19 @@ int	run(t_minishell *minish)
 
 	i = 0;
 	//// give_minishell(minish);
-	print_minishell(minish);
-	while (i < minish->number_of_commands)
+	if (built_in_parent(minish[0]->instr.executable[0]) && minish->number_of_commands == 1)
+		exec_builtin(minish[0]->instr.executable, minish);
+	else
 	{
-		if (pipe(minish->fd_pipes[i]) == -1 )
-			perror("bablda");
-		i++;
+		print_minishell(minish);
+		while (i < minish->number_of_commands)
+		{
+			if (pipe(minish->fd_pipes[i]) == -1 )
+				perror("bablda");
+			i++;
+		}
+		process(minish);
 	}
-	process(minish);
 	return (0);
 }
 void	process(t_minishell *minish)
