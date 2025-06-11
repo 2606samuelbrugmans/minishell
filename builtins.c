@@ -20,9 +20,9 @@ int built_in_parent(char *cmd) {
     );
 }
 int exec_builtin(char **argv, t_minishell *shell) {
-    if (ft_strcmp(argv, "echo") == 0)
+    if (ft_strcmp(argv[0], "echo") == 0)
         return builtin_echo(argv);
-    if (ft_strcmp(argv, "cd") == 0)
+    if (ft_strcmp(argv[0], "cd") == 0)
         return builtin_cd(argv, shell);
     if (ft_strcmp(argv[0], "pwd") == 0)
         return builtin_pwd();
