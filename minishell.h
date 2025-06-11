@@ -50,6 +50,13 @@ void	child_process(t_minishell *minish, int parser);
 void	close_stuff(t_minishell *minish, int parser);
 void	store(t_minishell *minish, int pars,
 	char *filename, char direction);
+int is_builtin(const char *cmd);
+int built_in_parent(char *cmd);
+int exec_builtin(char **argv, t_minishell *shell);
+int builtin_echo(char **argv);
+int builtin_cd(char **argv);
+int builtin_pwd(void);
+
 void	ft_putnbr_fd(int n, int fd);
 int		get_string(t_minishell *minish, int where, int pars, char direction);
 void	skip_quotes(const char *str, int base_index, int *offset_index);
