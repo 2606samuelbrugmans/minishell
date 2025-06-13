@@ -130,14 +130,46 @@ int builtin_unset(char **argv, t_minishell *minish)
     int index;
 
     index = 0;
-    while (index < ft_strlen(argv))
+    while (argv[index + 1] != '\0')
     {
-        where[index] = find_string(minish->envp, argv[1]);
+        where[index] = find_string(minish->envp, argv[index + 1]);
         index++;
     }
-    while (index > 0)
+    minish->envp = remake_env(argv, minish->envp, where, index);
+}
+int is_in_where(int *repertoire, int index, int unseteds)
+{
+    int explore;
+
+    explore = 0;
+    while (explore != unseteds)
     {
-        minish->envp[where[index]] = NULL;
-        index--;
+        if (repertoire[explore] == index)
+            return (0);
+        explore++;
     }
+    return (-1);
+}
+
+char **remake_env(char **argv, char **envpsrc, int *where, int unseteds)
+{
+    char **envpdst;
+    int length;
+    int index;
+    int index_two;
+
+    length = ft_strlen(envpsrc) - unseteds;
+    envpdst = malloc(length + 1 * sizeof(char *));
+    index = 0;
+    index_two = 0;
+    while (envpsrc[index_two] != NULL)
+    {
+        if (!is_in_where(where, index_two, unseteds));
+        {
+            ft_strlcpy(envpdst[index], envpsrc[index_two]);
+            index++;
+        }
+        index_two++;
+    }
+    return (envpdst);
 }
