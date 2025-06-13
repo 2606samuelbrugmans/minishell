@@ -8,6 +8,15 @@ size_t	ft_strlen(const char *s)
 		index++;
 	return (index);
 }
+int ft_sstrlen(char **string)
+{
+	int index;
+
+	index = 0;
+	while (string[index] != NULL)
+		index++;
+	return (index);
+}
 char	*ft_strdup(const char *s1)
 {
 	int		index;
@@ -120,4 +129,16 @@ void	ft_putstr_fd(char *s, int fd)
 		write(fd, &s[index], 1);
 		index++;
 	}
+}
+char	**ft_sstrjoin(char **s1, char *s2)
+{
+	size_t	len_s1;
+	size_t	index;
+
+	index = 0;
+	len_s1 = ft_sstrlen(s1);
+	s1 = realloc(s1, (len_s1 +  2) * sizeof(char *));
+	s1[len_s1] = s2;
+	s1[len_s1 + 1] = NULL;
+	return (s1);
 }

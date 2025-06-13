@@ -56,3 +56,24 @@ int	ft_strcmp(const char *s1, const char *s2)
 	}
 	return (0);
 }
+char	*ft_strchr(const char *s, int c)
+{
+	int		index;
+	char	convc;
+
+	convc = (char)c;
+	index = 0;
+	if (convc == '\0')
+	{
+		while (s[index] != '\0')
+			index++;
+		return ((char *)&s[index]);
+	}
+	while (s[index] != '\0')
+	{
+		if (s[index] == convc)
+			return ((char *)&s[index]);
+		index++;
+	}
+	return (NULL);
+}

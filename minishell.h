@@ -43,6 +43,11 @@ typedef struct t_minishell
 } 	t_minishell;
 /// @brief // redirection type [0] is the input [1] is the output
 ///// first file in the arrays of files are the executed ones
+char	**ft_sstrjoin(char **s1, char *s2);
+int builtin_exit(void);
+char	*ft_strchr(const char *s, int c);
+int is_in_where(int *repertoire, int index, int unseteds);
+
 
 void 	close_parent(t_minishell *minish);
 char	*remove_quote(char *string, char quote);
@@ -54,8 +59,12 @@ int is_builtin(const char *cmd);
 int built_in_parent(char *cmd);
 int exec_builtin(char **argv, t_minishell *shell);
 int builtin_echo(char **argv);
-int builtin_cd(char **argv);
+int builtin_cd(char **argv, t_minishell *minish);
 int builtin_pwd(void);
+int ft_sstrlen(char **string);
+char **remake_env(char **envpsrc, int *where, int unseteds);
+int builtin_unset(char **argv, t_minishell *minish);
+int builtin_export(char **argv, t_minishell *minish);
 
 void	ft_putnbr_fd(int n, int fd);
 int		get_string(t_minishell *minish, int where, int pars, char direction);
