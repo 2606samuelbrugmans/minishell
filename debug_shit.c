@@ -116,7 +116,7 @@ void init_minishell(t_minishell *minish)
     minish->number_of_commands = 2;
     // Pipe locations (terminated with -1)
     minish->fd_pipes = malloc((minish->number_of_commands -1) * sizeof(int[2]));
-    minish->parsed_string = strdup("env | cat >output.txt");
+    minish->parsed_string = strdup("ls | cat >output.txt");
     // Environment variables
     // Local variables
     minish->local_variables = malloc(2 * sizeof(char *));
@@ -129,9 +129,9 @@ void init_minishell(t_minishell *minish)
     // Fill in one instruction manually
     t_instructions *instr = &minish->instru[0];
     instr->executable = malloc(2 * sizeof(char *));
-    instr->executable[0] = strdup("env");
+    instr->executable[0] = strdup("ls");
     instr->executable[1] = NULL;
-    instr->command = strdup("env");
+    instr->command = strdup("ls");
     //instr->path_command = strdup("/usr/bin/ls");
     instr->number_files_to = 0;
     //instr->redirection_to = malloc(sizeof(int));
