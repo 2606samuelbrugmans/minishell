@@ -111,17 +111,16 @@ int builtin_pwd(void)
 }
 int find_nth(char**envp, int meower)
 {
-    int index;
-    int current;
+    int index = 0;
+    int current = -1;
 
-    index = 0;
-    current = 0;
     while (envp[index] != NULL)
     {
-        if (ft_strcmp(envp[index], envp[meower]) > 0 && ft_strcmp(envp[index], envp[current]) < 0)
-            current = index;
-        else if (ft_strcmp(envp[current], envp[meower]) > 0)
-            current = index + 1;
+        if (ft_strcmp(envp[index], envp[meower]) > 0)
+        {
+            if (current == -1 || ft_strcmp(envp[index], envp[current]) < 0)
+                current = index;
+        }
         index++;
     }
     return (current);
@@ -152,8 +151,10 @@ void print_declare(char **envp)
 {
     int *order;
     int index;
-
-    order = malloc(ft_sstrlen(envp) + 1);
+	int len;
+	
+	len =ft_sstrlen(envp);
+    order = malloc(sizeof(int) * + 1);
     order[0] = ft_sstrlen(envp);
     index = 2;
     order[1] = find_first(envp);
